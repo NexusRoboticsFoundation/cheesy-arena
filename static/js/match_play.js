@@ -6,7 +6,12 @@
 var websocket;
 let scoreIsReady;
 let isReplay;
+
+let canStartMatch = false;
+
 const lowBatteryThreshold = 8;
+
+const startMatchKey = 'F16'; // A key not on keyboards that can be mapped to a handheld button.
 
 // Sends a websocket message to load the specified match.
 const loadMatch = function (matchId) {
@@ -126,6 +131,8 @@ const getTeamNumber = function (station) {
 
 // Handles a websocket message to update the team connection status.
 const handleArenaStatus = function (data) {
+  canStartMatch = data.CanStartMatch;
+
   // Update the team status view.
   $.each(data.AllianceStations, function (station, stationStatus) {
     const wifiStatus = stationStatus.WifiStatus;
@@ -186,7 +193,7 @@ const handleArenaStatus = function (data) {
   // Enable/disable the buttons based on the current match state.
   switch (matchStates[data.MatchState]) {
     case "PRE_MATCH":
-      $("#startMatch").prop("disabled", !data.CanStartMatch);
+      // $("#startMatch").prop("disabled", !data.CanStartMatch);
       $("#abortMatch").prop("disabled", true);
       $("#signalVolunteers").prop("disabled", false);
       $("#signalReset").prop("disabled", false);
@@ -205,7 +212,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", true);
       $("#showFinalScore").prop("disabled", true);
       $("#scoreRadio").prop("disabled", true);
-      $("#startMatch").prop("disabled", true);
+      // $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", false);
       $("#signalVolunteers").prop("disabled", true);
       $("#signalReset").prop("disabled", true);
@@ -220,7 +227,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", true);
       $("#showFinalScore").prop("disabled", true);
       $("#scoreRadio").prop("disabled", true);
-      $("#startMatch").prop("disabled", true);
+      // $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", true);
       $("#signalVolunteers").prop("disabled", false);
       $("#signalReset").prop("disabled", false);
@@ -235,7 +242,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", true);
       $("#showFinalScore").prop("disabled", false);
       $("#scoreRadio").prop("disabled", false);
-      $("#startMatch").prop("disabled", true);
+      // $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", false);
       $("#signalVolunteers").prop("disabled", true);
       $("#signalReset").prop("disabled", true);
@@ -250,7 +257,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", false);
       $("#showFinalScore").prop("disabled", false);
       $("#scoreRadio").prop("disabled", false);
-      $("#startMatch").prop("disabled", true);
+      // $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", true);
       $("#signalVolunteers").prop("disabled", true);
       $("#signalReset").prop("disabled", true);
@@ -425,5 +432,19 @@ $(function () {
     scoringStatus: function (event) {
       handleScoringStatus(event.data);
     },
+  });
+
+  $(document).keydown(event => {
+    if(event.key === startMatchKey) {
+      event.preventDefault();
+      console.log(`Received start match keydown (${startMatchKey})`);
+
+      if(canStartMatch) {
+        console.log('Starting match');
+        startMatch();
+      } else {
+        console.warn('Match start is not enabled');
+      }
+    }
   });
 });
