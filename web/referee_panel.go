@@ -7,15 +7,17 @@ package web
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/Team254/cheesy-arena/field"
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
 	"github.com/Team254/cheesy-arena/websocket"
 	"github.com/mitchellh/mapstructure"
-	"io"
-	"log"
-	"net/http"
-	"strconv"
 )
 
 // Renders the referee interface for assigning fouls.
@@ -234,6 +236,30 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			web.arena.AllianceStationDisplayMode = "fieldReset"
 			web.arena.AllianceStationDisplayModeNotifier.Notify()
 			web.arena.ScoringStatusNotifier.Notify()
+
+			err = web.commitCurrentMatchScore()
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+			err = web.arena.ResetMatch()
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+			err = web.arena.LoadNextMatch(true)
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+
+			web.arena.SetAudienceDisplayMode("score")
+
+			// Only show the score for 15 seconds before moving on to the next match.
+			go func() {
+				time.Sleep(15 * time.Second)
+				web.arena.SetAudienceDisplayMode("intro")
+			}()
 		default:
 			ws.WriteError(fmt.Sprintf("Invalid message type '%s'.", messageType))
 		}
