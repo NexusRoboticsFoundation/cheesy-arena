@@ -214,6 +214,7 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			web.arena.FieldReset = true
 			web.arena.AllianceStationDisplayMode = "fieldReset"
 			web.arena.AllianceStationDisplayModeNotifier.Notify()
+			web.arena.PlaySound("field_reset")
 		case "fieldSafe":
 			if web.arena.MatchState != field.PreMatch {
 				continue

@@ -300,6 +300,7 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 			web.arena.FieldReset = true
 			web.arena.AllianceStationDisplayMode = "fieldReset"
 			web.arena.AllianceStationDisplayModeNotifier.Notify()
+			web.arena.PlaySound("field_reset")
 		case "commitResults":
 			if web.arena.MatchState != field.PostMatch {
 				ws.WriteError("cannot commit match while it is in progress")
