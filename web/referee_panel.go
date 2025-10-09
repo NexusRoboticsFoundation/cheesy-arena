@@ -212,6 +212,16 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			web.arena.FieldReset = true
 			web.arena.AllianceStationDisplayMode = "fieldReset"
 			web.arena.AllianceStationDisplayModeNotifier.Notify()
+		case "fieldSafe":
+			if web.arena.MatchState != field.PreMatch {
+				continue
+			}
+			web.arena.FieldSafe = true
+		case "fieldUnsafe":
+			if web.arena.MatchState != field.PreMatch {
+				continue
+			}
+			web.arena.FieldSafe = false
 		case "commitMatch":
 			if web.arena.MatchState != field.PostMatch {
 				// Don't allow committing the fouls until the match is over.

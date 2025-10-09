@@ -27,7 +27,7 @@ UI for entering and tracking fouls and red/yellow cards.
       <div class="scoring-status" id="blueFarScoreStatus"></div>
     </div>
   </div>
-  <div id="fouls">
+  <div id="fouls" class="during-match">
     <div id="scoreSummary" class="headRef-dependent">
       {{template "scoreSummary" dict "id" "blueScoreSummary"}}
       {{template "scoreSummary" dict "id" "redScoreSummary"}}
@@ -41,12 +41,26 @@ UI for entering and tracking fouls and red/yellow cards.
     </div>
     <div id="foulList"></div>
   </div>
+
+  <div class="pre-match mx-auto">
+    <div class="py-5">
+      <p>Hold down the button below once all the following conditions are met:</p>
+      <ul>
+        <li>No humans are on the field</li>
+        <li>All gates are closed</li>
+        <li>The FTA is holding the trigger</li>
+      </ul>
+    </div>
+    <button class="safe-button btn btn-lg btn-danger w-100" id="safeButton" onpointerdown="fieldSafe();">Field is safe</button>
+  </div>
 </div>
-<p>Note: Team and rule assignment are optional.</p>
-<div id="controlButtons" class="headRef-dependent">
-  <div class="control-button" id="volunteerButton" onclick="signalVolunteers();">Signal Count</div>
-  <div class="control-button" id="resetButton" onclick="signalReset();">Signal Reset</div>
-  <div class="control-button" id="commitButton" onclick="commitMatch();">Commit Match</div>
+<p class="during-match">Note: Team and rule assignment are optional.</p>
+<div class="during-match">
+  <div id="controlButtons" class="headRef-dependent">
+    <div class="control-button" id="volunteerButton" onclick="signalVolunteers();">Signal Count</div>
+    <div class="control-button" id="resetButton" onclick="signalReset();">Signal Reset</div>
+    <div class="control-button" id="commitButton" onclick="commitMatch();">Commit Match</div>
+  </div>
 </div>
 {{end}}
 {{define "head"}}

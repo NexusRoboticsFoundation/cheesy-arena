@@ -245,3 +245,7 @@ h3 {
   text-align: right;
   padding: 0 0.2vw;
 }
+
+.safe-button {
+  height: 72px;
+}

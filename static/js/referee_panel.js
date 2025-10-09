@@ -62,6 +62,22 @@ var commitMatch = function () {
   websocket.send("commitMatch");
 };
 
+// Sends a websocket message to unlock match start.
+var fieldSafe = function () {
+  websocket.send("fieldSafe");
+
+  $('.safe-button').addClass('btn-success');
+  $('.safe-button').removeClass('btn-danger');
+};
+
+// Sends a websocket message to lock match start.
+var fieldUnsafe = function () {
+  websocket.send("fieldUnsafe");
+
+  $('.safe-button').addClass('btn-danger');
+  $('.safe-button').removeClass('btn-success');
+};
+
 // Handles a websocket message to update the teams for the current match.
 var handleMatchLoad = function (data) {
   $("#matchName").text(data.Match.LongName);
@@ -84,6 +100,14 @@ var handleMatchLoad = function (data) {
 // Handles a websocket message to update the match status.
 const handleMatchTime = function (data) {
   $(".control-button").attr("data-enabled", matchStates[data.MatchState] === "POST_MATCH");
+  
+  if(matchStates[data.MatchState] === "PRE_MATCH") {
+    $(".during-match").hide();
+    $(".pre-match").show();
+  } else {
+    $(".during-match").show();
+    $(".pre-match").hide();
+  }
 };
 
 const endgameStatusNames = [
@@ -210,4 +234,8 @@ $(function () {
       handleScoringStatus(event.data);
     },
   });
+
+  $(document).on('pointerup', ()=> {
+    fieldUnsafe();
+  })
 });

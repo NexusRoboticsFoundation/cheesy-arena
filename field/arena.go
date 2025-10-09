@@ -79,6 +79,7 @@ type Arena struct {
 	EventStatus                       EventStatus
 	FieldVolunteers                   bool
 	FieldReset                        bool
+	FieldSafe                         bool
 	AudienceDisplayMode               string
 	SavedMatch                        *model.Match
 	SavedMatchResult                  *model.MatchResult
@@ -469,6 +470,7 @@ func (arena *Arena) StartMatch() error {
 		}
 
 		arena.MatchState = StartMatch
+		arena.FieldSafe = false
 	}
 	return err
 }
@@ -913,6 +915,10 @@ func (arena *Arena) checkCanStartMatch() error {
 				return fmt.Errorf("cannot start match while PLC ArmorBlock %q is not connected", name)
 			}
 		}
+	}
+
+	if !arena.FieldSafe {
+		return fmt.Errorf("cannot start match until head ref marks field as safe")
 	}
 
 	return nil
