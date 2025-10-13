@@ -47,6 +47,23 @@ var cycleCard = function (cardButton) {
   $(cardButton).attr("data-card", newCard);
 };
 
+// Cycles through disabled and enabled.
+var cycleDisableCard = function (cardButton) {
+  const isDisabled = $(cardButton).hasClass('disabled-status');
+  $("#confirmDisableTitle").text(`${isDisabled ? 'Enable' : 'Disable'} ${$(cardButton).text()}?`);
+  $("#confirmDisableAction").text(isDisabled ? 'Enable' : 'Disable')
+  $("#confirmDisable").attr('data-station', $(cardButton).attr('data-station'));
+  $("#confirmDisable").modal('show');
+};
+
+var confirmDisable = function() {
+  const station = $("#confirmDisable").attr('data-station');
+  websocket.send(
+    "disable",
+    station
+  );
+}
+
 // Sends a websocket message to signal to the volunteers that they may enter the field.
 var signalVolunteers = function () {
   websocket.send("signalVolunteers");
@@ -89,6 +106,13 @@ var handleMatchLoad = function (data) {
   setTeamCard("blue", 2, data.Teams["B2"]);
   setTeamCard("blue", 3, data.Teams["B3"]);
 
+  setTeamDisableCard("R1", data.Teams["R1"]);
+  setTeamDisableCard("R2", data.Teams["R2"]);
+  setTeamDisableCard("R3", data.Teams["R3"]);
+  setTeamDisableCard("B1", data.Teams["B1"]);
+  setTeamDisableCard("B2", data.Teams["B2"]);
+  setTeamDisableCard("B3", data.Teams["B3"]);
+
   $("#redScoreSummary .team-1").text(data.Teams["R1"].Id);
   $("#redScoreSummary .team-2").text(data.Teams["R2"].Id);
   $("#redScoreSummary .team-3").text(data.Teams["R3"].Id);
@@ -97,16 +121,37 @@ var handleMatchLoad = function (data) {
   $("#blueScoreSummary .team-3").text(data.Teams["B3"].Id);
 };
 
+var handleArenaStatus = function (data) {
+  setTeamDisableStatusCard("R1", data.AllianceStations["R1"]);
+  setTeamDisableStatusCard("R2", data.AllianceStations["R2"]);
+  setTeamDisableStatusCard("R3", data.AllianceStations["R3"]);
+  setTeamDisableStatusCard("B1", data.AllianceStations["B1"]);
+  setTeamDisableStatusCard("B2", data.AllianceStations["B2"]);
+  setTeamDisableStatusCard("B3", data.AllianceStations["B3"]);
+};
+
 // Handles a websocket message to update the match status.
 const handleMatchTime = function (data) {
   $(".control-button").attr("data-enabled", matchStates[data.MatchState] === "POST_MATCH");
   
   if(matchStates[data.MatchState] === "PRE_MATCH") {
     $(".during-match").hide();
+    $(".during-and-post-match").hide();
+    $(".pre-and-during-match").show();
     $(".pre-match").show();
+    $(".post-match").hide();
+  } else if (matchStates[data.MatchState] === "POST_MATCH") {
+    $(".during-match").hide();
+    $(".during-and-post-match").show();
+    $(".pre-and-during-match").hide();
+    $(".pre-match").hide();
+    $(".post-match").show();
   } else {
     $(".during-match").show();
+    $(".during-and-post-match").show();
+    $(".pre-and-during-match").show();
     $(".pre-match").hide();
+    $(".post-match").hide();
   }
 };
 
@@ -204,6 +249,28 @@ const setTeamCard = function (alliance, position, team) {
   cardButton.attr("data-card", "");
 }
 
+// Populates the disable button for a given team.
+const setTeamDisableCard = function (station, team) {
+  const cardButton = $(`#${station}DisableCard`);
+  if (team === null) {
+    cardButton.text('-');
+  } else {
+    cardButton.text(team.Id);
+  }
+}
+
+// Populates the disable status color for a given team.
+const setTeamDisableStatusCard = function (station, status) {
+  const cardButton = $(`#${station}DisableCard`);
+  if(status.Bypass) {
+    cardButton.removeClass('enabled-status');
+    cardButton.addClass('disabled-status');
+  } else {
+    cardButton.addClass('enabled-status');
+    cardButton.removeClass('disabled-status');
+  }
+}
+
 // Produces a hash code of the given object for use in equality comparisons.
 const hashObject = function (object) {
   const s = JSON.stringify(object);
@@ -233,6 +300,9 @@ $(function () {
     scoringStatus: function (event) {
       handleScoringStatus(event.data);
     },
+    arenaStatus: function (event) {
+      handleArenaStatus(event.data);
+    }
   });
 
   $(document).on('pointerup', ()=> {

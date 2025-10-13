@@ -88,6 +88,7 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 		web.arena.RealtimeScoreNotifier,
 		web.arena.ScoringStatusNotifier,
 		web.arena.ReloadDisplaysNotifier,
+		web.arena.ArenaStatusNotifier,
 	)
 
 	// Loop, waiting for commands and responding to them, until the client closes the connection.
@@ -197,6 +198,20 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				cards[strconv.Itoa(args.TeamId)] = args.Card
 			}
 			web.arena.RealtimeScoreNotifier.Notify()
+		case "disable":
+			station, ok := data.(string)
+			if !ok {
+				ws.WriteError(fmt.Sprintf("Failed to parse '%s' message.", messageType))
+				continue
+			}
+			if _, ok := web.arena.AllianceStations[station]; !ok {
+				ws.WriteError(fmt.Sprintf("Invalid alliance station '%s'.", station))
+				continue
+			}
+			web.arena.AllianceStations[station].Bypass = !web.arena.AllianceStations[station].Bypass
+			if err = ws.WriteNotifier(web.arena.ArenaStatusNotifier); err != nil {
+				log.Println(err)
+			}
 		case "signalVolunteers":
 			if web.arena.MatchState != field.PostMatch {
 				// Don't allow clearing the field until the match is over.

@@ -50,12 +50,18 @@ h3 {
   border: 1px solid #666;
   border-radius: 1vw;
 }
-#redCards {
+.red-cards {
   margin-bottom: 1vw;
   background-color: #322;
 }
-#blueCards {
+.blue-cards {
   background-color: #223;
+}
+.team-card.enabled-status {
+  background-color: #198754;
+}
+.team-card.disabled-status {
+  background-color: #dc3545;
 }
 .team-card {
   margin: 0.5vw 0;
