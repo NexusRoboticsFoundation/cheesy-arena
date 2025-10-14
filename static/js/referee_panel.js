@@ -6,6 +6,7 @@
 var websocket;
 let redFoulsHashCode = 0;
 let blueFoulsHashCode = 0;
+let scoreIsReady = false;
 
 // Sends the foul to the server to add it to the list.
 const addFoul = function (alliance, isMajor) {
@@ -79,8 +80,16 @@ var signalReset = function () {
   websocket.send("signalReset");
 };
 
-// Signals the scorekeeper that foul entry is complete for this match.
 var commitMatch = function () {
+  if(scoreIsReady) {
+    confirmCommit();
+    return;
+  }
+  $("#confirmCommit").modal('show');
+}
+
+// Signals the scorekeeper that foul entry is complete for this match.
+var confirmCommit = function () {
   websocket.send("commitMatch");
 };
 
@@ -112,12 +121,12 @@ var handleMatchLoad = function (data) {
   setTeamDisableCard("B2", data.Teams["B2"]);
   setTeamDisableCard("B3", data.Teams["B3"]);
 
-  $("#redScoreSummary .team-1").text(data.Teams["R1"].Id);
-  $("#redScoreSummary .team-2").text(data.Teams["R2"].Id);
-  $("#redScoreSummary .team-3").text(data.Teams["R3"].Id);
-  $("#blueScoreSummary .team-1").text(data.Teams["B1"].Id);
-  $("#blueScoreSummary .team-2").text(data.Teams["B2"].Id);
-  $("#blueScoreSummary .team-3").text(data.Teams["B3"].Id);
+  $("#redScoreSummary .team-1").text(data.Teams["R1"]?.Id);
+  $("#redScoreSummary .team-2").text(data.Teams["R2"]?.Id);
+  $("#redScoreSummary .team-3").text(data.Teams["R3"]?.Id);
+  $("#blueScoreSummary .team-1").text(data.Teams["B1"]?.Id);
+  $("#blueScoreSummary .team-2").text(data.Teams["B2"]?.Id);
+  $("#blueScoreSummary .team-3").text(data.Teams["B3"]?.Id);
 };
 
 var handleArenaStatus = function (data) {
@@ -231,6 +240,20 @@ const handleScoringStatus = function (data) {
   updateScoreStatus(data, "red_far", "#redFarScoreStatus", "Red Far");
   updateScoreStatus(data, "blue_near", "#blueNearScoreStatus", "Blue Near");
   updateScoreStatus(data, "blue_far", "#blueFarScoreStatus", "Blue Far");
+
+  scoreIsReady = true;
+  for (const status of Object.values(data.PositionStatuses)) {
+    if (!status.Ready) {
+      scoreIsReady = false;
+      break;
+    }
+  }
+
+  if(scoreIsReady) {
+    $("#commitButton").removeClass('disabled');
+  } else {
+    $("#commitButton").addClass('disabled');
+  }
 }
 
 // Helper function to update a badge that shows scoring panel commit status.

@@ -97,6 +97,27 @@ UI for entering and tracking fouls and red/yellow cards.
     </div>
   </div>
 </div>
+<div id="confirmCommit" class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="confirmDisableTitle">Missing scores</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to commit & post without all scoring tablets having committed?
+      </div>
+      <div class="modal-footer">
+        <form class="form-horizontal">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary ms-2" onclick="confirmCommit();" data-bs-dismiss="modal">
+            Commit & post
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {{end}}
 {{define "head"}}
 <link rel="manifest" href="/static/manifest/referee.manifest">
