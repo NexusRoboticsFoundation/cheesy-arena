@@ -53,7 +53,12 @@ var cycleDisableCard = function (cardButton) {
   $("#confirmDisableTitle").text(`${isDisabled ? 'Enable' : 'Disable'} ${$(cardButton).text()}?`);
   $("#confirmDisableAction").text(isDisabled ? 'Enable' : 'Disable')
   $("#confirmDisable").attr('data-station', $(cardButton).attr('data-station'));
-  $("#confirmDisable").modal('show');
+
+  if($(cardButton).text() === '-') {
+    confirmDisable();
+  } else {
+    $("#confirmDisable").modal('show');
+  }
 };
 
 var confirmDisable = function() {
@@ -82,17 +87,11 @@ var commitMatch = function () {
 // Sends a websocket message to unlock match start.
 var fieldSafe = function () {
   websocket.send("fieldSafe");
-
-  $('.safe-button').addClass('btn-success');
-  $('.safe-button').removeClass('btn-danger');
 };
 
 // Sends a websocket message to lock match start.
 var fieldUnsafe = function () {
   websocket.send("fieldUnsafe");
-
-  $('.safe-button').addClass('btn-danger');
-  $('.safe-button').removeClass('btn-success');
 };
 
 // Handles a websocket message to update the teams for the current match.
@@ -128,6 +127,14 @@ var handleArenaStatus = function (data) {
   setTeamDisableStatusCard("B1", data.AllianceStations["B1"]);
   setTeamDisableStatusCard("B2", data.AllianceStations["B2"]);
   setTeamDisableStatusCard("B3", data.AllianceStations["B3"]);
+
+  if(data.CanStartMatch) {
+    $('.safe-button').addClass('btn-success');
+    $('.safe-button').removeClass('btn-danger');
+  } else {
+    $('.safe-button').removeClass('btn-success');
+    $('.safe-button').addClass('btn-danger');
+  }
 };
 
 // Handles a websocket message to update the match status.

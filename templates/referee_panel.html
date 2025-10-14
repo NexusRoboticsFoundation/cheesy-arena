@@ -9,7 +9,7 @@ UI for entering and tracking fouls and red/yellow cards.
 <div id="matchName"></div>
 <div id="refereePanel">
   <div id="cards" class="headRef-dependent">
-    <div class="post-match">
+    <div class="post-match text-center">
       <h3>Red/Yellow Cards</h3>
       <div class="alliance-cards">
         {{range $i := seq 3}}
@@ -22,8 +22,9 @@ UI for entering and tracking fouls and red/yellow cards.
         {{end}}
       </div>
     </div>
-    <div class="pre-and-during-match">
-      <h3>Disable</h3>
+    <div class="pre-and-during-match text-center">
+      <h3 class="pre-match">Bypass</h3>
+      <h3 class="during-match">Disable</h3>
       <div class="alliance-cards red-cards">
         {{range $i := seq 3}}
         {{template "teamDisableCard" dict "alliance" "R" "position" $i}}
@@ -64,7 +65,7 @@ UI for entering and tracking fouls and red/yellow cards.
         <li>No humans are on the field</li>
         <li>All gates are closed</li>
         <li>The FTA is holding the trigger</li>
-        <li>Any robots not on the field are disabled</li>
+        <li>Any robots not on the field are bypassed</li>
       </ul>
     </div>
     <button class="safe-button btn btn-lg btn-danger w-100" id="safeButton" onpointerdown="fieldSafe();">Field is safe</button>
