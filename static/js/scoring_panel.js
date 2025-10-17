@@ -88,6 +88,14 @@ const addFoul = function (alliance, isMajor) {
   renderLocalFoulCounts();
 }
 
+var makeFullscreen = function() {
+  toggleFullscreen();
+  $("#fullscreenButton").hide();
+  if (!___wakeLock) {
+    requestWakeLock();
+  }
+}
+
 // Handles a websocket message to update the match status.
 const handleMatchTime = function (data) {
   switch (matchStates[data.MatchState]) {

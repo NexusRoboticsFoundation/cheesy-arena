@@ -173,3 +173,10 @@ input[data-changed="true"], select[data-changed="true"] {
     font-style: italic;
     opacity: 0.4;
 }
+
+#fullscreenButton {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 15px;
+}
