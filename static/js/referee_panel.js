@@ -342,5 +342,7 @@ $(function () {
 
   $(document).on('pointerup', ()=> {
     fieldUnsafe();
-  })
+  });
 });
+
+window.oncontextmenu = function() { return false; }
