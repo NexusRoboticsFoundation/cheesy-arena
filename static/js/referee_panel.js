@@ -73,9 +73,7 @@ var confirmDisable = function() {
 var makeFullscreen = function() {
   toggleFullscreen();
   $("#fullscreenButton").hide();
-  if (!___wakeLock) {
-    requestWakeLock();
-  }
+  preventSleep();
 }
 
 // Sends a websocket message to signal to the volunteers that they may enter the field.

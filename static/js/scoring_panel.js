@@ -91,9 +91,7 @@ const addFoul = function (alliance, isMajor) {
 var makeFullscreen = function() {
   toggleFullscreen();
   $("#fullscreenButton").hide();
-  if (!___wakeLock) {
-    requestWakeLock();
-  }
+  preventSleep();
 }
 
 // Handles a websocket message to update the match status.
