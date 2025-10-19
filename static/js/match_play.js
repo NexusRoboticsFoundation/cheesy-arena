@@ -12,6 +12,9 @@ let canStartMatch = false;
 const lowBatteryThreshold = 8;
 
 const startMatchKey = 'F16'; // A key not on keyboards that can be mapped to a handheld button.
+let countdownStarted = 0;
+const countdownDuration = 1000 * 5;
+const countdownTimeout = 1000 * 8;
 
 // Sends a websocket message to load the specified match.
 const loadMatch = function (matchId) {
@@ -44,6 +47,7 @@ const toggleBypass = function (station) {
 
 // Sends a websocket message to start the match.
 const startMatch = function () {
+  countdownStarted = 0;
   websocket.send("startMatch",
     {muteMatchSounds: $("#muteMatchSounds").prop("checked")});
 };
@@ -440,8 +444,19 @@ $(function () {
       console.log(`Received start match keydown (${startMatchKey})`);
 
       if(canStartMatch) {
-        console.log('Starting match');
-        startMatch();
+        if(!countdownStarted || (Date.now() - countdownStarted) > countdownTimeout) {
+          countdownStarted = Date.now();
+          websocket.send("countdown");
+          console.log('Started countdown');
+          return;
+        }
+        if(countdownStarted) {
+          const diff = Date.now() - countdownStarted;
+          if(diff > countdownDuration) {
+            startMatch(); 
+            console.log('Started match');
+          }
+        }
       } else {
         console.warn('Match start is not enabled');
       }
