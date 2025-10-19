@@ -14,7 +14,7 @@ const lowBatteryThreshold = 8;
 const startMatchKey = 'F16'; // A key not on keyboards that can be mapped to a handheld button.
 let countdownStarted = 0;
 let delayedCountdownStarted = false;
-const countdownDuration = 1000 * 5; // Duration of the countdown audio clip
+const countdownDuration = 1000 * 4.5; // Duration of the countdown audio clip
 const countdownDelayedDuration = 1000 * 2.5; // Duration of the countdown_delayed audio clip
 const countdownDelay = 1000 * 5; // The window of time after the countdown completed that the match can start
 const countdownTimeout = 1000 * 30; // The window that the delayed countdown clip will be played within, otherwise a new countdown will be started
@@ -472,4 +472,18 @@ $(function () {
       }
     }
   });
+
+  // $(document).keydown(event => {
+  //   if(event.key === startMatchKey) {
+  //     event.preventDefault();
+  //     console.log(`Received start match keydown (${startMatchKey})`);
+
+  //     if(canStartMatch) {
+  //       startMatch();
+  //       console.log('Started match');
+  //     } else {
+  //       console.warn('Match start is not enabled');
+  //     }
+  //   }
+  // });
 });
