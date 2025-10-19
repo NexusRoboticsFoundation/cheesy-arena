@@ -51,6 +51,7 @@ const toggleBypass = function (station) {
 // Sends a websocket message to start the match.
 const startMatch = function () {
   countdownStarted = 0;
+  canStartMatch = false;
   websocket.send("startMatch",
     {muteMatchSounds: $("#muteMatchSounds").prop("checked")});
 };
@@ -463,7 +464,7 @@ $(function () {
           return;
         }
         if((delayedCountdownStarted && diff > countdownDelayedDuration) || (!delayedCountdownStarted && diff > countdownDuration)) {
-          startMatch(); 
+          startMatch();
           console.log('Started match');
         }
       } else {
