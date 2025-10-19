@@ -302,7 +302,19 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 			web.arena.AllianceStationDisplayModeNotifier.Notify()
 			web.arena.PlaySound("field_reset")
 		case "countdown":
-			web.arena.PlaySound("countdown")
+			args := struct {
+				Delayed bool
+			}{}
+			err = mapstructure.Decode(data, &args)
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+			if args.Delayed {
+				web.arena.PlaySound("countdown_delayed")
+			} else {
+				web.arena.PlaySound("countdown")
+			}
 		case "commitResults":
 			if web.arena.MatchState != field.PostMatch {
 				ws.WriteError("cannot commit match while it is in progress")

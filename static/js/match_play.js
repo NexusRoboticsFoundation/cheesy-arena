@@ -13,8 +13,11 @@ const lowBatteryThreshold = 8;
 
 const startMatchKey = 'F16'; // A key not on keyboards that can be mapped to a handheld button.
 let countdownStarted = 0;
-const countdownDuration = 1000 * 5;
-const countdownTimeout = 1000 * 8;
+let delayedCountdownStarted = false;
+const countdownDuration = 1000 * 5; // Duration of the countdown audio clip
+const countdownDelayedDuration = 1000 * 2.5; // Duration of the countdown_delayed audio clip
+const countdownDelay = 1000 * 5; // The window of time after the countdown completed that the match can start
+const countdownTimeout = 1000 * 30; // The window that the delayed countdown clip will be played within, otherwise a new countdown will be started
 
 // Sends a websocket message to load the specified match.
 const loadMatch = function (matchId) {
@@ -444,18 +447,24 @@ $(function () {
       console.log(`Received start match keydown (${startMatchKey})`);
 
       if(canStartMatch) {
-        if(!countdownStarted || (Date.now() - countdownStarted) > countdownTimeout) {
+        const diff = Date.now() - countdownStarted;
+        if(!countdownStarted || diff > countdownTimeout) {
           countdownStarted = Date.now();
-          websocket.send("countdown");
+          delayedCountdownStarted = false;
+          websocket.send("countdown", {delayed: false});
           console.log('Started countdown');
           return;
         }
-        if(countdownStarted) {
-          const diff = Date.now() - countdownStarted;
-          if(diff > countdownDuration) {
-            startMatch(); 
-            console.log('Started match');
-          }
+        if((!delayedCountdownStarted && diff > (countdownDuration + countdownDelay)) || (delayedCountdownStarted && diff > (countdownDelayedDuration + countdownDelay))) {
+          delayedCountdownStarted = true;
+          countdownStarted = Date.now();
+          websocket.send("countdown", {delayed: true});
+          console.log('Started delayed countdown');
+          return;
+        }
+        if((delayedCountdownStarted && diff > countdownDelayedDuration) || (!delayedCountdownStarted && diff > countdownDuration)) {
+          startMatch(); 
+          console.log('Started match');
         }
       } else {
         console.warn('Match start is not enabled');
