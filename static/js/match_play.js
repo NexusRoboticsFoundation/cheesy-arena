@@ -442,48 +442,48 @@ $(function () {
     },
   });
 
-  $(document).keydown(event => {
-    if(event.key === startMatchKey) {
-      event.preventDefault();
-      console.log(`Received start match keydown (${startMatchKey})`);
-
-      if(canStartMatch) {
-        const diff = Date.now() - countdownStarted;
-        if(!countdownStarted || diff > countdownTimeout) {
-          countdownStarted = Date.now();
-          delayedCountdownStarted = false;
-          websocket.send("countdown", {delayed: false});
-          console.log('Started countdown');
-          return;
-        }
-        if((!delayedCountdownStarted && diff > (countdownDuration + countdownDelay)) || (delayedCountdownStarted && diff > (countdownDelayedDuration + countdownDelay))) {
-          delayedCountdownStarted = true;
-          countdownStarted = Date.now();
-          websocket.send("countdown", {delayed: true});
-          console.log('Started delayed countdown');
-          return;
-        }
-        if((delayedCountdownStarted && diff > countdownDelayedDuration) || (!delayedCountdownStarted && diff > countdownDuration)) {
-          startMatch();
-          console.log('Started match');
-        }
-      } else {
-        console.warn('Match start is not enabled');
-      }
-    }
-  });
-
   // $(document).keydown(event => {
   //   if(event.key === startMatchKey) {
   //     event.preventDefault();
   //     console.log(`Received start match keydown (${startMatchKey})`);
 
   //     if(canStartMatch) {
-  //       startMatch();
-  //       console.log('Started match');
+  //       const diff = Date.now() - countdownStarted;
+  //       if(!countdownStarted || diff > countdownTimeout) {
+  //         countdownStarted = Date.now();
+  //         delayedCountdownStarted = false;
+  //         websocket.send("countdown", {delayed: false});
+  //         console.log('Started countdown');
+  //         return;
+  //       }
+  //       if((!delayedCountdownStarted && diff > (countdownDuration + countdownDelay)) || (delayedCountdownStarted && diff > (countdownDelayedDuration + countdownDelay))) {
+  //         delayedCountdownStarted = true;
+  //         countdownStarted = Date.now();
+  //         websocket.send("countdown", {delayed: true});
+  //         console.log('Started delayed countdown');
+  //         return;
+  //       }
+  //       if((delayedCountdownStarted && diff > countdownDelayedDuration) || (!delayedCountdownStarted && diff > countdownDuration)) {
+  //         startMatch();
+  //         console.log('Started match');
+  //       }
   //     } else {
   //       console.warn('Match start is not enabled');
   //     }
   //   }
   // });
+
+  $(document).keydown(event => {
+    if(event.key === startMatchKey) {
+      event.preventDefault();
+      console.log(`Received start match keydown (${startMatchKey})`);
+
+      if(canStartMatch) {
+        startMatch();
+        console.log('Started match');
+      } else {
+        console.warn('Match start is not enabled');
+      }
+    }
+  });
 });
