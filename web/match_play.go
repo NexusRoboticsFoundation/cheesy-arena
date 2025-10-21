@@ -311,7 +311,7 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 				continue
 			}
 			if args.Delayed {
-				web.arena.PlaySound("countdown_delayed")
+				web.arena.PlaySound("countdown_again")
 			} else {
 				web.arena.PlaySound("countdown")
 			}

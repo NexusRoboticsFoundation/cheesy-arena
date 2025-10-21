@@ -76,7 +76,7 @@ func UpdateMatchSounds() {
 			-1,
 		},
 		{
-			"countdown_delayed",
+			"countdown_again",
 			"wav",
 			-1,
 		},
