@@ -249,8 +249,7 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			web.arena.BlueRealtimeScore.FoulsCommitted = true
 			web.arena.FieldVolunteers = false
 			web.arena.FieldReset = true
-			web.arena.AllianceStationDisplayMode = "fieldReset"
-			web.arena.AllianceStationDisplayModeNotifier.Notify()
+			web.arena.SetAllianceStationDisplayMode("fieldReset")
 			web.arena.ScoringStatusNotifier.Notify()
 
 			err = web.commitCurrentMatchScore()
@@ -271,10 +270,24 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 
 			web.arena.SetAudienceDisplayMode("score")
 
-			// Only show the score for 15 seconds before moving on to the next match.
+			// Only show the score for 20 seconds before moving on to the next match.
 			go func() {
-				time.Sleep(15 * time.Second)
-				web.arena.SetAudienceDisplayMode("intro")
+				time.Sleep(20 * time.Second)
+
+				if web.arena.AudienceDisplayMode == "score" {
+					if web.arena.MatchState == field.TimeoutActive {
+						web.arena.SetAudienceDisplayMode("timeout")
+						web.arena.SetAllianceStationDisplayMode("timeout")
+						return
+					}
+					if web.arena.CurrentMatch.Type == model.Test {
+						web.arena.SetAudienceDisplayMode("logoLuma")
+						web.arena.SetAllianceStationDisplayMode("logo")
+						return
+					}
+					
+					web.arena.SetAudienceDisplayMode("intro")
+				}
 			}()
 		default:
 			ws.WriteError(fmt.Sprintf("Invalid message type '%s'.", messageType))

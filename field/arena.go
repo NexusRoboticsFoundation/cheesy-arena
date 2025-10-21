@@ -658,10 +658,8 @@ func (arena *Arena) Update() {
 			go func() {
 				// Leave the timer on the screen briefly at the end of the timeout period.
 				time.Sleep(time.Second * matchEndScoreDwellSec)
-				arena.AudienceDisplayMode = "blank"
-				arena.AudienceDisplayModeNotifier.Notify()
-				arena.AllianceStationDisplayMode = "logo"
-				arena.AllianceStationDisplayModeNotifier.Notify()
+				arena.SetAudienceDisplayMode("intro")
+				arena.SetAllianceStationDisplayMode("match")
 			}()
 		}
 	case PostTimeout:
