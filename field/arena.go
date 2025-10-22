@@ -1151,28 +1151,16 @@ func (arena *Arena) checkForNexusLineupChanges() {
 	}
 
 	lineup, err := arena.NexusClient.GetLineup(arena.CurrentMatch.TbaMatchKey)
-	if err != nil {
-		log.Printf("Failed to load lineup from Nexus: %s", err.Error())
-	} else {
-		if arena.lineupHasChanged(lineup) {
-			log.Printf("Found updated lineup from Nexus, substituting")
+	if err == nil {
+		if !arena.CurrentMatch.IsLineupEqual(lineup) {
 			err = arena.SubstituteTeams(lineup[0], lineup[1], lineup[2], lineup[3], lineup[4], lineup[5])
-			if err != nil {
-				log.Printf("Failed to substitute teams using Nexus lineup; loading match normally: %s", err.Error())
+			if err == nil {
+				log.Printf("Successfully loaded new lineup for match %s from Nexus: %v", arena.CurrentMatch.TbaMatchKey.String(), *lineup)
 			} else {
-				log.Printf(
-					"Successfully loaded lineup for match %s from Nexus: %v", arena.CurrentMatch.TbaMatchKey.String(), *lineup,
-				)
+				log.Printf("Received updated lineup from Nexus (%v), but failed to substitute teams: %s", *lineup, err.Error())
 			}
 		}
 	}
-}
-
-func (arena *Arena) lineupHasChanged(lineup *[6]int) bool {
-	if arena.CurrentMatch.Red1 == lineup[0] && arena.CurrentMatch.Red2 == lineup[1] && arena.CurrentMatch.Red3 == lineup[2] && arena.CurrentMatch.Blue1 == lineup[3] && arena.CurrentMatch.Blue2 == lineup[4] && arena.CurrentMatch.Blue3 == lineup[5] {
-		return false
-	}
-	return true
 }
 
 // Performs any actions that need to run at the interval specified by periodicTaskPeriodSec.
