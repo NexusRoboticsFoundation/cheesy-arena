@@ -211,3 +211,24 @@ func TestTbaMatchKeyString(t *testing.T) {
 	key = TbaMatchKey{CompLevel: "f", SetNumber: 1, MatchNumber: 4}
 	assert.Equal(t, "f1m4", key.String())
 }
+
+func TestIsLineupEqual(t *testing.T) {
+	db := setupTestDb(t)
+	defer db.Close()
+
+	match := Match{
+		Type:      Qualification,
+		TypeOrder: 254,
+		ShortName: "Q254",
+		LongName:  "Qualification 254",
+		Red1:      1,
+		Red2:      2,
+		Red3:      3,
+		Blue1:     4,
+		Blue2:     5,
+		Blue3:     6,
+	}
+	
+	assert.Equal(t, match.IsLineupEqual(&[6]int{1,2,3,4,5,6}), true)
+	assert.Equal(t, match.IsLineupEqual(&[6]int{1,2,300,4,5,6}), false)
+}
