@@ -51,10 +51,12 @@ UI for controlling match play and viewing team connection and field status.
         onclick="showOverlay();" disabled>
         Show Overlay
       </button>
-      <!-- <button type="button" id="startMatch" class="btn btn-success btn-match-play ms-1"
+      {{if eq .EventSettings.MatchStartMethod 0}}
+      <button type="button" id="startMatch" class="btn btn-success btn-match-play ms-1"
         onclick="startMatch();" disabled>
         Start Match
-      </button> -->
+      </button>
+      {{end}}
       <button type="button" id="commitResults" class="btn btn-primary btn-match-play ms-1"
         onclick="confirmCommit();" disabled>
         Commit Results
@@ -93,6 +95,16 @@ UI for controlling match play and viewing team connection and field status.
     <div class="card card-body bg-body-tertiary mt-3">
       <div class="row">
         <div class="col-lg-3">
+          <h6 id="match-start-method" data-method="{{.EventSettings.MatchStartMethod}}">Match start method</h6>
+          {{if eq .EventSettings.MatchStartMethod 0}}
+            <p>Scorekeeper button</p>
+          {{end}}
+          {{if eq .EventSettings.MatchStartMethod 1}}
+            <p>FTA trigger</p>
+          {{end}}
+          {{if eq .EventSettings.MatchStartMethod 2}}
+            <p>FTA trigger with automated countdown</p>
+          {{end}}
           <h6>Scoring</h6>
           <p><span class="badge badge-scoring" id="refereeScoreStatus">Referee</span><br/>
             <span class="badge badge-scoring" id="redNearScoreStatus"></span><br/>

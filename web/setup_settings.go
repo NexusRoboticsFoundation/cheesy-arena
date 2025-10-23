@@ -70,6 +70,14 @@ func (web *Web) settingsPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	eventSettings.PlayoffType = playoffType
 
+	var matchStartMethod model.MatchStartMethod
+	switch r.PostFormValue("matchStartMethod") {
+	case "Scorekeeper": matchStartMethod = model.Scorekeeper
+	case "FtaTrigger": matchStartMethod = model.FtaTrigger
+	case "FtaTriggerCountdown": matchStartMethod = model.FtaTriggerCountdown
+	}
+	eventSettings.MatchStartMethod = matchStartMethod
+
 	eventSettings.NumPlayoffAlliances = numAlliances
 	eventSettings.SelectionRound2Order = r.PostFormValue("selectionRound2Order")
 	eventSettings.SelectionRound3Order = r.PostFormValue("selectionRound3Order")

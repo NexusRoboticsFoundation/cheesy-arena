@@ -201,7 +201,7 @@ const handleArenaStatus = function (data) {
   // Enable/disable the buttons based on the current match state.
   switch (matchStates[data.MatchState]) {
     case "PRE_MATCH":
-      // $("#startMatch").prop("disabled", !data.CanStartMatch);
+      $("#startMatch").prop("disabled", !data.CanStartMatch);
       $("#abortMatch").prop("disabled", true);
       $("#signalVolunteers").prop("disabled", false);
       $("#signalReset").prop("disabled", false);
@@ -220,7 +220,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", true);
       $("#showFinalScore").prop("disabled", true);
       $("#scoreRadio").prop("disabled", true);
-      // $("#startMatch").prop("disabled", true);
+      $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", false);
       $("#signalVolunteers").prop("disabled", true);
       $("#signalReset").prop("disabled", true);
@@ -235,7 +235,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", true);
       $("#showFinalScore").prop("disabled", true);
       $("#scoreRadio").prop("disabled", true);
-      // $("#startMatch").prop("disabled", true);
+      $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", true);
       $("#signalVolunteers").prop("disabled", false);
       $("#signalReset").prop("disabled", false);
@@ -250,7 +250,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", true);
       $("#showFinalScore").prop("disabled", false);
       $("#scoreRadio").prop("disabled", false);
-      // $("#startMatch").prop("disabled", true);
+      $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", false);
       $("#signalVolunteers").prop("disabled", true);
       $("#signalReset").prop("disabled", true);
@@ -265,7 +265,7 @@ const handleArenaStatus = function (data) {
       $("#introRadio").prop("disabled", false);
       $("#showFinalScore").prop("disabled", false);
       $("#scoreRadio").prop("disabled", false);
-      // $("#startMatch").prop("disabled", true);
+      $("#startMatch").prop("disabled", true);
       $("#abortMatch").prop("disabled", true);
       $("#signalVolunteers").prop("disabled", true);
       $("#signalReset").prop("disabled", true);
@@ -442,48 +442,46 @@ $(function () {
     },
   });
 
-  // $(document).keydown(event => {
-  //   if(event.key === startMatchKey) {
-  //     event.preventDefault();
-  //     console.log(`Received start match keydown (${startMatchKey})`);
+  const method = $('#match-start-method').data('method');
+  if(method) {
+    $(document).keydown(event => {
+      if(event.key === startMatchKey) {
+        event.preventDefault();
+        console.log(`Received start match keydown (${startMatchKey})`);
 
-  //     if(canStartMatch) {
-  //       const diff = Date.now() - countdownStarted;
-  //       if(!countdownStarted || diff > countdownTimeout) {
-  //         countdownStarted = Date.now();
-  //         delayedCountdownStarted = false;
-  //         websocket.send("countdown", {delayed: false});
-  //         console.log('Started countdown');
-  //         return;
-  //       }
-  //       if((!delayedCountdownStarted && diff > (countdownDuration + countdownDelay)) || (delayedCountdownStarted && diff > (countdownDelayedDuration + countdownDelay))) {
-  //         delayedCountdownStarted = true;
-  //         countdownStarted = Date.now();
-  //         websocket.send("countdown", {delayed: true});
-  //         console.log('Started delayed countdown');
-  //         return;
-  //       }
-  //       if((delayedCountdownStarted && diff > countdownDelayedDuration) || (!delayedCountdownStarted && diff > countdownDuration)) {
-  //         startMatch();
-  //         console.log('Started match');
-  //       }
-  //     } else {
-  //       console.warn('Match start is not enabled');
-  //     }
-  //   }
-  // });
-
-  $(document).keydown(event => {
-    if(event.key === startMatchKey) {
-      event.preventDefault();
-      console.log(`Received start match keydown (${startMatchKey})`);
-
-      if(canStartMatch) {
-        startMatch();
-        console.log('Started match');
-      } else {
-        console.warn('Match start is not enabled');
+        if(method == 1) {
+          if(canStartMatch) {
+            startMatch();
+            console.log('Started match');
+          } else {
+            console.warn('Match start is not enabled');
+          }
+        } else if(method == 2) {
+          if(canStartMatch) {
+            const diff = Date.now() - countdownStarted;
+            if(!countdownStarted || diff > countdownTimeout) {
+              countdownStarted = Date.now();
+              delayedCountdownStarted = false;
+              websocket.send("countdown", {delayed: false});
+              console.log('Started countdown');
+              return;
+            }
+            if((!delayedCountdownStarted && diff > (countdownDuration + countdownDelay)) || (delayedCountdownStarted && diff > (countdownDelayedDuration + countdownDelay))) {
+              delayedCountdownStarted = true;
+              countdownStarted = Date.now();
+              websocket.send("countdown", {delayed: true});
+              console.log('Started delayed countdown');
+              return;
+            }
+            if((delayedCountdownStarted && diff > countdownDelayedDuration) || (!delayedCountdownStarted && diff > countdownDuration)) {
+              startMatch();
+              console.log('Started match');
+            }
+          } else {
+            console.warn('Match start is not enabled');
+          }
+        }
       }
-    }
-  });
+    });
+  }
 });

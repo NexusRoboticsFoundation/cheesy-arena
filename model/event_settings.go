@@ -18,6 +18,15 @@ const (
 	SingleEliminationPlayoff
 )
 
+type MatchStartMethod int
+
+const (
+	Scorekeeper MatchStartMethod = iota
+	FtaTrigger
+	FtaTriggerCountdown
+)
+
+
 // Configured here to avoid circular import dependencies.
 var (
 	sccDefaultUpCommands = []string{
@@ -87,6 +96,7 @@ type EventSettings struct {
 	CoralBonusCoopEnabled       bool
 	BargeBonusPointThreshold    int
 	IncludeAlgaeInBargeBonus    bool
+	MatchStartMethod            MatchStartMethod
 }
 
 func (database *Database) GetEventSettings() (*EventSettings, error) {
@@ -120,6 +130,7 @@ func (database *Database) GetEventSettings() (*EventSettings, error) {
 		CoralBonusCoopEnabled:       game.CoralBonusCoopEnabled,
 		BargeBonusPointThreshold:    game.BargeBonusPointThreshold,
 		IncludeAlgaeInBargeBonus:    game.IncludeAlgaeInBargeBonus,
+		MatchStartMethod:            Scorekeeper,
 	}
 
 	if err := database.eventSettingsTable.create(&eventSettings); err != nil {
