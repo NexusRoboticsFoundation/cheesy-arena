@@ -340,7 +340,7 @@ $(function () {
     }
   });
 
-  $(document).on('pointerup', ()=> {
+  $(document).on('pointerup pointercancel', ()=> {
     fieldUnsafe();
   });
 });
