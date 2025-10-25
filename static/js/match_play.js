@@ -440,6 +440,9 @@ $(function () {
     scoringStatus: function (event) {
       handleScoringStatus(event.data);
     },
+    error: function(event) {
+      console.error('Websocket error', event?.data);
+    }
   });
 
   const method = $('#match-start-method').data('method');
