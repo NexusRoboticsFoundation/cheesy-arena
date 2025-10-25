@@ -17,7 +17,7 @@ let delayedCountdownStarted = false;
 const countdownDuration = 1000 * 3.5; // Duration of the countdown audio clip
 const countdownDelayedDuration = 1000 * 3.5; // Duration of the countdown_delayed audio clip
 const countdownDelay = 1000 * 5; // The window of time after the countdown completed that the match can start
-const countdownTimeout = 1000 * 30; // The window that the delayed countdown clip will be played within, otherwise a new countdown will be started
+const countdownTimeout = 1000 * 90; // The window that the delayed countdown clip will be played within, otherwise a new countdown will be started
 
 // Sends a websocket message to load the specified match.
 const loadMatch = function (matchId) {
