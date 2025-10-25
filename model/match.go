@@ -134,6 +134,19 @@ func (match *Match) ShouldAllowNexusSubstitution() bool {
 	return match.Type == Practice || match.Type == Playoff
 }
 
+// Returns true if the given lineup matches the current teams in the match.
+func (match *Match) IsLineupEqual(lineup *[6]int) bool {
+	if match.Red1 == lineup[0] &&
+		match.Red2 == lineup[1] &&
+		match.Red3 == lineup[2] &&
+		match.Blue1 == lineup[3] &&
+		match.Blue2 == lineup[4] &&
+		match.Blue3 == lineup[5] {
+		return true
+	}
+	return false
+}
+
 // Returns true if the red and yellow cards should be updated as a result of the match.
 func (match *Match) ShouldUpdateCards() bool {
 	return match.Type == Qualification || match.Type == Playoff

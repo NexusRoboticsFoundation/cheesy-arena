@@ -178,6 +178,9 @@ func (arena *Arena) GenerateMatchLoadMessage() any {
 		}
 	}
 
+	// Don't allow manual substitution of practice/playoff teams if they are automatically pulled from Nexus.
+	var allowManualSubstitution = arena.CurrentMatch.ShouldAllowSubstitution() && !(arena.EventSettings.NexusEnabled && arena.CurrentMatch.ShouldAllowNexusSubstitution())
+
 	return &struct {
 		Match             *model.Match
 		AllowSubstitution bool
@@ -190,7 +193,7 @@ func (arena *Arena) GenerateMatchLoadMessage() any {
 		BreakDescription  string
 	}{
 		arena.CurrentMatch,
-		arena.CurrentMatch.ShouldAllowSubstitution(),
+		allowManualSubstitution,
 		isReplay,
 		teams,
 		rankings,

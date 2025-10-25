@@ -80,6 +80,7 @@ type Arena struct {
 	EventStatus                       EventStatus
 	FieldVolunteers                   bool
 	FieldReset                        bool
+	FieldSafe                         bool
 	AudienceDisplayMode               string
 	SavedMatch                        *model.Match
 	SavedMatchResult                  *model.MatchResult
@@ -524,6 +525,7 @@ func (arena *Arena) StartMatch() error {
 		}
 
 		arena.MatchState = StartMatch
+		arena.FieldSafe = false
 	}
 	return err
 }
@@ -723,10 +725,8 @@ func (arena *Arena) Update() {
 			go func() {
 				// Leave the timer on the screen briefly at the end of the timeout period.
 				time.Sleep(time.Second * matchEndScoreDwellSec)
-				arena.AudienceDisplayMode = "blank"
-				arena.AudienceDisplayModeNotifier.Notify()
-				arena.AllianceStationDisplayMode = "logo"
-				arena.AllianceStationDisplayModeNotifier.Notify()
+				arena.SetAudienceDisplayMode("intro")
+				arena.SetAllianceStationDisplayMode("match")
 			}()
 		}
 	case PostTimeout:
@@ -1004,6 +1004,10 @@ func (arena *Arena) checkCanStartMatch() error {
 		}
 	}
 
+	if !arena.FieldSafe {
+		return fmt.Errorf("cannot start match until head ref marks field as safe")
+	}
+
 	return nil
 }
 
@@ -1226,10 +1230,34 @@ func (arena *Arena) positionPostMatchScoreReady(position string) bool {
 	return numPanels > 0 && arena.ScoringPanelRegistry.GetNumScoreCommitted(position) >= numPanels
 }
 
+func (arena *Arena) checkForNexusLineupChanges() {
+	if arena.MatchState != PreMatch {
+		return
+	}
+
+	if !arena.CurrentMatch.ShouldAllowNexusSubstitution() || !arena.EventSettings.NexusEnabled {
+		return
+	}
+
+	lineup, err := arena.NexusClient.GetLineup(arena.CurrentMatch.TbaMatchKey)
+	if err == nil {
+		if !arena.CurrentMatch.IsLineupEqual(lineup) {
+			err = arena.SubstituteTeams(lineup[0], lineup[1], lineup[2], lineup[3], lineup[4], lineup[5])
+			if err == nil {
+				log.Printf("Successfully loaded new lineup for match %s from Nexus: %v", arena.CurrentMatch.TbaMatchKey.String(), *lineup)
+			} else {
+				log.Printf("Received updated lineup from Nexus (%v), but failed to substitute teams: %s", *lineup, err.Error())
+			}
+		}
+	}
+}
+
 // Performs any actions that need to run at the interval specified by periodicTaskPeriodSec.
 func (arena *Arena) runPeriodicTasks() {
 	arena.updateEarlyLateMessage()
 	arena.purgeDisconnectedDisplays()
+
+	arena.checkForNexusLineupChanges()
 }
 
 // trussLightWarningSequence generates the sequence of truss light states during the "sonar ping" warning sound. It

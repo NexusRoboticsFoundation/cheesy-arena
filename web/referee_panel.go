@@ -7,15 +7,17 @@ package web
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/Team254/cheesy-arena/field"
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
 	"github.com/Team254/cheesy-arena/websocket"
 	"github.com/mitchellh/mapstructure"
-	"io"
-	"log"
-	"net/http"
-	"strconv"
 )
 
 // Renders the referee interface for assigning fouls.
@@ -86,6 +88,7 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 		web.arena.RealtimeScoreNotifier,
 		web.arena.ScoringStatusNotifier,
 		web.arena.ReloadDisplaysNotifier,
+		web.arena.ArenaStatusNotifier,
 	)
 
 	// Loop, waiting for commands and responding to them, until the client closes the connection.
@@ -195,6 +198,20 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				cards[strconv.Itoa(args.TeamId)] = args.Card
 			}
 			web.arena.RealtimeScoreNotifier.Notify()
+		case "disable":
+			station, ok := data.(string)
+			if !ok {
+				ws.WriteError(fmt.Sprintf("Failed to parse '%s' message.", messageType))
+				continue
+			}
+			if _, ok := web.arena.AllianceStations[station]; !ok {
+				ws.WriteError(fmt.Sprintf("Invalid alliance station '%s'.", station))
+				continue
+			}
+			web.arena.AllianceStations[station].Bypass = !web.arena.AllianceStations[station].Bypass
+			if err = ws.WriteNotifier(web.arena.ArenaStatusNotifier); err != nil {
+				log.Println(err)
+			}
 		case "signalVolunteers":
 			if web.arena.MatchState != field.PostMatch {
 				// Don't allow clearing the field until the match is over.
@@ -212,6 +229,17 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			web.arena.FieldReset = true
 			web.arena.AllianceStationDisplayMode = "fieldReset"
 			web.arena.AllianceStationDisplayModeNotifier.Notify()
+			web.arena.PlaySound("field_reset")
+		case "fieldSafe":
+			if web.arena.MatchState != field.PreMatch {
+				continue
+			}
+			web.arena.FieldSafe = true
+		case "fieldUnsafe":
+			if web.arena.MatchState != field.PreMatch {
+				continue
+			}
+			web.arena.FieldSafe = false
 		case "commitMatch":
 			if web.arena.MatchState != field.PostMatch {
 				// Don't allow committing the fouls until the match is over.
@@ -221,9 +249,46 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			web.arena.BlueRealtimeScore.FoulsCommitted = true
 			web.arena.FieldVolunteers = false
 			web.arena.FieldReset = true
-			web.arena.AllianceStationDisplayMode = "fieldReset"
-			web.arena.AllianceStationDisplayModeNotifier.Notify()
+			web.arena.SetAllianceStationDisplayMode("fieldReset")
 			web.arena.ScoringStatusNotifier.Notify()
+
+			err = web.commitCurrentMatchScore()
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+			err = web.arena.ResetMatch()
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+			err = web.arena.LoadNextMatch(true)
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+
+			web.arena.SetAudienceDisplayMode("score")
+
+			// Only show the score for 20 seconds before moving on to the next match.
+			go func() {
+				time.Sleep(20 * time.Second)
+
+				if web.arena.AudienceDisplayMode == "score" {
+					if web.arena.MatchState == field.TimeoutActive {
+						web.arena.SetAudienceDisplayMode("timeout")
+						web.arena.SetAllianceStationDisplayMode("timeout")
+						return
+					}
+					if web.arena.CurrentMatch.Type == model.Test {
+						web.arena.SetAudienceDisplayMode("logoLuma")
+						web.arena.SetAllianceStationDisplayMode("logo")
+						return
+					}
+					
+					web.arena.SetAudienceDisplayMode("intro")
+				}
+			}()
 		default:
 			ws.WriteError(fmt.Sprintf("Invalid message type '%s'.", messageType))
 		}

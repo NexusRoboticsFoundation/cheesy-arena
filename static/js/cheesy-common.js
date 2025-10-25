@@ -32,3 +32,28 @@ const newDateTimePicker = function (id, defaultTime) {
     }
   );
 };
+
+const isFullscreen = function () {
+  var doc = window.document;
+
+  return doc.fullscreenElement || doc.mozFullScreenElement 
+      || doc.webkitFullscreenElement || doc.msFullscreenElement;
+}
+
+const toggleFullscreen = function () {
+  var doc = window.document;
+  var docElement = doc.documentElement;
+
+  var requestFullScreen = docElement.requestFullscreen || 
+      docElement.mozRequestFullScreen || docElement.webkitRequestFullScreen ||
+      docElement.msRequestFullscreen;
+  var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen ||
+      doc.webkitExitFullscreen || doc.msExitFullscreen;
+  
+  if (!isFullscreen()) {
+    requestFullScreen.call(docElement);
+  }
+  else {
+    cancelFullScreen.call(doc);
+  }
+};

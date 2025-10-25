@@ -6,6 +6,7 @@
 var websocket;
 let redFoulsHashCode = 0;
 let blueFoulsHashCode = 0;
+let scoreIsReady = false;
 
 // Sends the foul to the server to add it to the list.
 const addFoul = function (alliance, isMajor) {
@@ -47,6 +48,33 @@ var cycleCard = function (cardButton) {
   $(cardButton).attr("data-card", newCard);
 };
 
+// Cycles through disabled and enabled.
+var cycleDisableCard = function (cardButton) {
+  const isDisabled = $(cardButton).hasClass('disabled-status');
+  $("#confirmDisableTitle").text(`${isDisabled ? 'Enable' : 'Disable'} ${$(cardButton).text()}?`);
+  $("#confirmDisableAction").text(isDisabled ? 'Enable' : 'Disable')
+  $("#confirmDisable").attr('data-station', $(cardButton).attr('data-station'));
+
+  if($(cardButton).text() === '-') {
+    confirmDisable();
+  } else {
+    $("#confirmDisable").modal('show');
+  }
+};
+
+var confirmDisable = function() {
+  const station = $("#confirmDisable").attr('data-station');
+  websocket.send(
+    "disable",
+    station
+  );
+}
+
+var makeFullscreen = function() {
+  toggleFullscreen();
+  $("#fullscreenButton").hide();
+}
+
 // Sends a websocket message to signal to the volunteers that they may enter the field.
 var signalVolunteers = function () {
   websocket.send("signalVolunteers");
@@ -57,9 +85,27 @@ var signalReset = function () {
   websocket.send("signalReset");
 };
 
-// Signals the scorekeeper that foul entry is complete for this match.
 var commitMatch = function () {
+  if(scoreIsReady) {
+    confirmCommit();
+    return;
+  }
+  $("#confirmCommit").modal('show');
+}
+
+// Signals the scorekeeper that foul entry is complete for this match.
+var confirmCommit = function () {
   websocket.send("commitMatch");
+};
+
+// Sends a websocket message to unlock match start.
+var fieldSafe = function () {
+  websocket.send("fieldSafe");
+};
+
+// Sends a websocket message to lock match start.
+var fieldUnsafe = function () {
+  websocket.send("fieldUnsafe");
 };
 
 // Handles a websocket message to update the teams for the current match.
@@ -73,17 +119,61 @@ var handleMatchLoad = function (data) {
   setTeamCard("blue", 2, data.Teams["B2"]);
   setTeamCard("blue", 3, data.Teams["B3"]);
 
-  $("#redScoreSummary .team-1").text(data.Teams["R1"].Id);
-  $("#redScoreSummary .team-2").text(data.Teams["R2"].Id);
-  $("#redScoreSummary .team-3").text(data.Teams["R3"].Id);
-  $("#blueScoreSummary .team-1").text(data.Teams["B1"].Id);
-  $("#blueScoreSummary .team-2").text(data.Teams["B2"].Id);
-  $("#blueScoreSummary .team-3").text(data.Teams["B3"].Id);
+  setTeamDisableCard("R1", data.Teams["R1"]);
+  setTeamDisableCard("R2", data.Teams["R2"]);
+  setTeamDisableCard("R3", data.Teams["R3"]);
+  setTeamDisableCard("B1", data.Teams["B1"]);
+  setTeamDisableCard("B2", data.Teams["B2"]);
+  setTeamDisableCard("B3", data.Teams["B3"]);
+
+  $("#redScoreSummary .team-1").text(data.Teams["R1"]?.Id);
+  $("#redScoreSummary .team-2").text(data.Teams["R2"]?.Id);
+  $("#redScoreSummary .team-3").text(data.Teams["R3"]?.Id);
+  $("#blueScoreSummary .team-1").text(data.Teams["B1"]?.Id);
+  $("#blueScoreSummary .team-2").text(data.Teams["B2"]?.Id);
+  $("#blueScoreSummary .team-3").text(data.Teams["B3"]?.Id);
+};
+
+var handleArenaStatus = function (data) {
+  setTeamDisableStatusCard("R1", data.AllianceStations["R1"]);
+  setTeamDisableStatusCard("R2", data.AllianceStations["R2"]);
+  setTeamDisableStatusCard("R3", data.AllianceStations["R3"]);
+  setTeamDisableStatusCard("B1", data.AllianceStations["B1"]);
+  setTeamDisableStatusCard("B2", data.AllianceStations["B2"]);
+  setTeamDisableStatusCard("B3", data.AllianceStations["B3"]);
+
+  if(data.CanStartMatch) {
+    $('.safe-button').addClass('btn-success');
+    $('.safe-button').removeClass('btn-danger');
+  } else {
+    $('.safe-button').removeClass('btn-success');
+    $('.safe-button').addClass('btn-danger');
+  }
 };
 
 // Handles a websocket message to update the match status.
 const handleMatchTime = function (data) {
   $(".control-button").attr("data-enabled", matchStates[data.MatchState] === "POST_MATCH");
+  
+  if(matchStates[data.MatchState] === "PRE_MATCH") {
+    $(".during-match").hide();
+    $(".during-and-post-match").hide();
+    $(".pre-and-during-match").show();
+    $(".pre-match").show();
+    $(".post-match").hide();
+  } else if (matchStates[data.MatchState] === "POST_MATCH") {
+    $(".during-match").hide();
+    $(".during-and-post-match").show();
+    $(".pre-and-during-match").hide();
+    $(".pre-match").hide();
+    $(".post-match").show();
+  } else {
+    $(".during-match").show();
+    $(".during-and-post-match").show();
+    $(".pre-and-during-match").show();
+    $(".pre-match").hide();
+    $(".post-match").hide();
+  }
 };
 
 const endgameStatusNames = [
@@ -155,6 +245,20 @@ const handleScoringStatus = function (data) {
   updateScoreStatus(data, "red_far", "#redFarScoreStatus", "Red Far");
   updateScoreStatus(data, "blue_near", "#blueNearScoreStatus", "Blue Near");
   updateScoreStatus(data, "blue_far", "#blueFarScoreStatus", "Blue Far");
+
+  scoreIsReady = true;
+  for (const status of Object.values(data.PositionStatuses)) {
+    if (!status.Ready) {
+      scoreIsReady = false;
+      break;
+    }
+  }
+
+  if(scoreIsReady) {
+    $("#commitButton").removeClass('disabled');
+  } else {
+    $("#commitButton").addClass('disabled');
+  }
 }
 
 // Helper function to update a badge that shows scoring panel commit status.
@@ -178,6 +282,28 @@ const setTeamCard = function (alliance, position, team) {
     cardButton.attr("data-old-yellow-card", team.YellowCard);
   }
   cardButton.attr("data-card", "");
+}
+
+// Populates the disable button for a given team.
+const setTeamDisableCard = function (station, team) {
+  const cardButton = $(`#${station}DisableCard`);
+  if (team === null) {
+    cardButton.text('-');
+  } else {
+    cardButton.text(team.Id);
+  }
+}
+
+// Populates the disable status color for a given team.
+const setTeamDisableStatusCard = function (station, status) {
+  const cardButton = $(`#${station}DisableCard`);
+  if(status.Bypass) {
+    cardButton.removeClass('enabled-status');
+    cardButton.addClass('disabled-status');
+  } else {
+    cardButton.addClass('enabled-status');
+    cardButton.removeClass('disabled-status');
+  }
 }
 
 // Produces a hash code of the given object for use in equality comparisons.
@@ -209,5 +335,14 @@ $(function () {
     scoringStatus: function (event) {
       handleScoringStatus(event.data);
     },
+    arenaStatus: function (event) {
+      handleArenaStatus(event.data);
+    }
+  });
+
+  $(document).on('pointerup pointercancel', ()=> {
+    fieldUnsafe();
   });
 });
+
+window.oncontextmenu = function() { return false; }

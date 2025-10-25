@@ -9,16 +9,32 @@ UI for entering and tracking fouls and red/yellow cards.
 <div id="matchName"></div>
 <div id="refereePanel">
   <div id="cards" class="headRef-dependent">
-    <h3>Red/Yellow Cards</h3>
-    <div class="alliance-cards" id="redCards">
-      {{range $i := seq 3}}
-      {{template "teamCard" dict "alliance" "red" "position" $i}}
-      {{end}}
+    <div class="post-match text-center">
+      <h3>Red/Yellow Cards</h3>
+      <div class="alliance-cards">
+        {{range $i := seq 3}}
+        {{template "teamCard" dict "alliance" "red" "position" $i}}
+        {{end}}
+      </div>
+      <div class="alliance-cards">
+        {{range $i := seq 3}}
+        {{template "teamCard" dict "alliance" "blue" "position" $i}}
+        {{end}}
+      </div>
     </div>
-    <div class="alliance-cards" id="blueCards">
-      {{range $i := seq 3}}
-      {{template "teamCard" dict "alliance" "blue" "position" $i}}
-      {{end}}
+    <div class="pre-and-during-match text-center">
+      <h3 class="pre-match">Bypass</h3>
+      <h3 class="during-match">Disable</h3>
+      <div class="alliance-cards red-cards">
+        {{range $i := seq 3}}
+        {{template "teamDisableCard" dict "alliance" "R" "position" $i}}
+        {{end}}
+      </div>
+      <div class="alliance-cards blue-cards">
+        {{range $i := seq 3}}
+        {{template "teamDisableCard" dict "alliance" "B" "position" $i}}
+        {{end}}
+      </div>
     </div>
     <div id="scoringStatuses">
       <div class="scoring-status" id="redNearScoreStatus"></div>
@@ -27,7 +43,7 @@ UI for entering and tracking fouls and red/yellow cards.
       <div class="scoring-status" id="blueFarScoreStatus"></div>
     </div>
   </div>
-  <div id="fouls">
+  <div id="fouls" class="during-and-post-match">
     <div id="scoreSummary" class="headRef-dependent">
       {{template "scoreSummary" dict "id" "blueScoreSummary"}}
       {{template "scoreSummary" dict "id" "redScoreSummary"}}
@@ -41,12 +57,67 @@ UI for entering and tracking fouls and red/yellow cards.
     </div>
     <div id="foulList"></div>
   </div>
+
+  <div class="pre-match mx-auto">
+    <div class="py-5">
+      <p>Hold down the button below once all the following conditions are met:</p>
+      <ul>
+        <li>No humans are on the field</li>
+        <li>All gates are closed</li>
+        <li>The FTA is holding the trigger</li>
+        <li>Any robots not on the field are bypassed</li>
+      </ul>
+    </div>
+    <button class="safe-button btn btn-lg btn-danger w-100" id="safeButton" onpointerdown="fieldSafe();">Field is safe</button>
+  </div>
+  <button id="fullscreenButton" class="btn btn-lg btn-success" onclick="makeFullscreen()">Fullscreen</button>
 </div>
-<p>Note: Team and rule assignment are optional.</p>
-<div id="controlButtons" class="headRef-dependent">
-  <div class="control-button" id="volunteerButton" onclick="signalVolunteers();">Signal Count</div>
-  <div class="control-button" id="resetButton" onclick="signalReset();">Signal Reset</div>
-  <div class="control-button" id="commitButton" onclick="commitMatch();">Commit Match</div>
+<p class="during-and-post-match">Note: Team and rule assignment are optional.</p>
+<div class="post-match">
+  <div id="controlButtons" class="headRef-dependent">
+    <div class="control-button" id="volunteerButton" onclick="signalVolunteers();">Signal Count</div>
+    <div class="control-button" id="resetButton" onclick="signalReset();">Signal Reset</div>
+    <div class="control-button" id="commitButton" onclick="commitMatch();">Commit & Post</div>
+  </div>
+</div>
+<div id="confirmDisable" class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="confirmDisableTitle">Disable?</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-footer">
+        <form class="form-horizontal">
+          <button type="button" class="btn btn-lg btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-lg btn-danger ms-2" onclick="confirmDisable();" data-bs-dismiss="modal" id="confirmDisableAction">
+            Disable
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="confirmCommit" class="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="confirmDisableTitle">Missing scores</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to commit & post without all scoring tablets having committed?
+      </div>
+      <div class="modal-footer">
+        <form class="form-horizontal">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary ms-2" onclick="confirmCommit();" data-bs-dismiss="modal">
+            Commit & post
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 {{end}}
 {{define "head"}}
@@ -60,6 +131,10 @@ UI for entering and tracking fouls and red/yellow cards.
 {{end}}
 {{define "teamCard"}}
 <div class="team-card" id="{{.alliance}}Team{{.position}}Card" data-alliance="{{.alliance}}" onclick="cycleCard(this);">
+</div>
+{{end}}
+{{define "teamDisableCard"}}
+<div class="team-card" id="{{.alliance}}{{.position}}DisableCard" data-station="{{.alliance}}{{.position}}" onclick="cycleDisableCard(this);">
 </div>
 {{end}}
 {{define "scoreSummary"}}

@@ -50,12 +50,18 @@ h3 {
   border: 1px solid #666;
   border-radius: 1vw;
 }
-#redCards {
+.red-cards {
   margin-bottom: 1vw;
   background-color: #322;
 }
-#blueCards {
+.blue-cards {
   background-color: #223;
+}
+.team-card.enabled-status {
+  background-color: #198754;
+}
+.team-card.disabled-status {
+  background-color: #dc3545;
 }
 .team-card {
   margin: 0.5vw 0;
@@ -215,6 +221,9 @@ h3 {
 #commitButton {
   background-color: #26c;
 }
+#commitButton.disabled {
+  background-color: #666;
+}
 
 #scoreSummary {
   width: 100%;
@@ -244,4 +253,8 @@ h3 {
 #scoreSummary .label {
   text-align: right;
   padding: 0 0.2vw;
+}
+
+.safe-button {
+  height: 72px;
 }

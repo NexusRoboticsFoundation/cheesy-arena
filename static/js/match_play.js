@@ -6,7 +6,18 @@
 var websocket;
 let scoreIsReady;
 let isReplay;
+
+let canStartMatch = false;
+
 const lowBatteryThreshold = 8;
+
+const startMatchKey = 'F16'; // A key not on keyboards that can be mapped to a handheld button.
+let countdownStarted = 0;
+let delayedCountdownStarted = false;
+const countdownDuration = 1000 * 3.5; // Duration of the countdown audio clip
+const countdownDelayedDuration = 1000 * 3.5; // Duration of the countdown_delayed audio clip
+const countdownDelay = 1000 * 5; // The window of time after the countdown completed that the match can start
+const countdownTimeout = 1000 * 30; // The window that the delayed countdown clip will be played within, otherwise a new countdown will be started
 
 // Sends a websocket message to load the specified match.
 const loadMatch = function (matchId) {
@@ -39,6 +50,8 @@ const toggleBypass = function (station) {
 
 // Sends a websocket message to start the match.
 const startMatch = function () {
+  countdownStarted = 0;
+  canStartMatch = false;
   websocket.send("startMatch",
     {muteMatchSounds: $("#muteMatchSounds").prop("checked")});
 };
@@ -126,6 +139,8 @@ const getTeamNumber = function (station) {
 
 // Handles a websocket message to update the team connection status.
 const handleArenaStatus = function (data) {
+  canStartMatch = data.CanStartMatch;
+
   // Update the team status view.
   $.each(data.AllianceStations, function (station, stationStatus) {
     const wifiStatus = stationStatus.WifiStatus;
@@ -426,4 +441,47 @@ $(function () {
       handleScoringStatus(event.data);
     },
   });
+
+  const method = $('#match-start-method').data('method');
+  if(method) {
+    $(document).keydown(event => {
+      if(event.key === startMatchKey) {
+        event.preventDefault();
+        console.log(`Received start match keydown (${startMatchKey})`);
+
+        if(method == 1) {
+          if(canStartMatch) {
+            startMatch();
+            console.log('Started match');
+          } else {
+            console.warn('Match start is not enabled');
+          }
+        } else if(method == 2) {
+          if(canStartMatch) {
+            const diff = Date.now() - countdownStarted;
+            if(!countdownStarted || diff > countdownTimeout) {
+              countdownStarted = Date.now();
+              delayedCountdownStarted = false;
+              websocket.send("countdown", {delayed: false});
+              console.log('Started countdown');
+              return;
+            }
+            if((!delayedCountdownStarted && diff > (countdownDuration + countdownDelay)) || (delayedCountdownStarted && diff > (countdownDelayedDuration + countdownDelay))) {
+              delayedCountdownStarted = true;
+              countdownStarted = Date.now();
+              websocket.send("countdown", {delayed: true});
+              console.log('Started delayed countdown');
+              return;
+            }
+            if((delayedCountdownStarted && diff > countdownDelayedDuration) || (!delayedCountdownStarted && diff > countdownDuration)) {
+              startMatch();
+              console.log('Started match');
+            }
+          } else {
+            console.warn('Match start is not enabled');
+          }
+        }
+      }
+    });
+  }
 });
