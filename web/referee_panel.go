@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Team254/cheesy-arena/field"
@@ -275,6 +276,16 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				time.Sleep(20 * time.Second)
 
 				if web.arena.AudienceDisplayMode == "score" {
+					if web.arena.CurrentMatch.Type == model.Playoff {
+						if strings.Contains(web.arena.CurrentMatch.LongName, "Final") {
+							time.Sleep(20 * time.Second)
+						} else {
+							time.Sleep(10 * time.Second)
+							web.arena.SetAudienceDisplayMode("bracket")
+							time.Sleep(20 * time.Second)
+						}
+					}
+
 					if web.arena.MatchState == field.TimeoutActive {
 						web.arena.SetAudienceDisplayMode("timeout")
 						web.arena.SetAllianceStationDisplayMode("timeout")
@@ -285,7 +296,7 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 						web.arena.SetAllianceStationDisplayMode("logo")
 						return
 					}
-					
+
 					web.arena.SetAudienceDisplayMode("intro")
 				}
 			}()
