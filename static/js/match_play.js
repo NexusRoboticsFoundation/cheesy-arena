@@ -50,8 +50,6 @@ const toggleBypass = function (station) {
 
 // Sends a websocket message to start the match.
 const startMatch = function () {
-  countdownStarted = 0;
-  canStartMatch = false;
   websocket.send("startMatch",
     {muteMatchSounds: $("#muteMatchSounds").prop("checked")});
 };
@@ -318,6 +316,8 @@ const handleMatchLoad = function (data) {
   $("#showOverlay").prop("disabled", false);
   $("#introRadio").prop("disabled", false);
   $("#muteMatchSounds").prop("checked", false);
+
+  countdownStarted = 0;
 }
 
 // Handles a websocket message to update the match time countdown.

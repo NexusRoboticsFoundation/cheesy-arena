@@ -310,10 +310,12 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 				ws.WriteError(err.Error())
 				continue
 			}
-			if args.Delayed {
-				web.arena.PlaySound("countdown_again")
-			} else {
-				web.arena.PlaySound("countdown")
+			if(web.arena.MatchState == field.PreMatch) {
+				if args.Delayed {
+					web.arena.PlaySound("countdown_again")
+				} else {
+					web.arena.PlaySound("countdown")
+				}
 			}
 		case "commitResults":
 			if web.arena.MatchState != field.PostMatch {
