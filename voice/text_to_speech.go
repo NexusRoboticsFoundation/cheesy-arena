@@ -17,7 +17,7 @@ func TextToSpeech(text string, multiSpeaker bool) (*[]byte, error) {
 	}
 	defer client.Close()
 
-	prompt := "Say the following as a male emcee for a robotics competition."
+	prompt := "Say the following as a fast speaking male emcee for a robotics competition."
 	voice := &texttospeechpb.VoiceSelectionParams{
 			LanguageCode: "en-US",
 			ModelName: "gemini-2.5-flash-tts",
