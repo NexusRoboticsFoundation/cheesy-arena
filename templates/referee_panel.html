@@ -74,7 +74,7 @@ UI for entering and tracking fouls and red/yellow cards.
 </div>
 <p class="during-and-post-match">Note: Team and rule assignment are optional.</p>
 <div class="post-match">
-  <div id="controlButtons" class="headRef-dependent">
+  <div id="controlButtons" class="control-row" class="headRef-dependent">
     <div class="control-button" id="volunteerButton" onclick="signalVolunteers();">Signal Count</div>
     <div class="control-button" id="resetButton" onclick="signalReset();">Signal Reset</div>
     <div class="control-button" id="commitButton" onclick="commitMatch();">Commit & Post</div>
@@ -82,11 +82,15 @@ UI for entering and tracking fouls and red/yellow cards.
 </div>
 <div class="pre-match">
   <div class="headRef-dependent">
-    <div id="introControlButtons">
+    <div id="introControlButtons" class="control-row">
       <button class="btn btn-primary text-white intro-control-button" id="fastIntroButton" onclick="intro(0);">Intro short</button>
       <button class="btn btn-primary text-white intro-control-button" id="schoolIntroButton" onclick="intro(1);">Intro school</button>
       <button class="btn btn-primary text-white intro-control-button" id="locationIntroButton" onclick="intro(2);">Intro location</button>
       <button class="btn btn-primary text-white intro-control-button" id="sponsorIntroButton" onclick="intro(3);">Intro sponsors</button>
+    </div>
+    <div id="postIntroControlButtons" class="control-row" style="display: none;">
+      <button class="btn btn-primary text-white intro-control-button" id="matchReminderIntroButton" onclick="matchReminder();">Almost ready</button>
+      <button class="btn btn-secondary text-white intro-control-button" id="stopIntroButton" onclick="stopAudio();">Stop intro</button>
     </div>
   </div>
 </div>

@@ -55,6 +55,36 @@ func GetMatchIntroScript(match *model.Match, teams [6]*model.Team, details TeamD
 	return script, nil
 }
 
+func GetMatchReminderScript(match *model.Match) (string, error) {
+	var matchName = "this match"
+	switch match.Type {
+		case model.Practice: matchName = fmt.Sprintf("Practice match %d", match.TypeOrder)
+		case model.Qualification: matchName = fmt.Sprintf("Qualification %d", match.TypeOrder)
+		case model.Playoff: matchName = fmt.Sprintf("Playoff match %d", match.TypeOrder)
+	}
+
+	var playoffDetail = " "
+	if match.Type == model.Playoff {
+		if strings.Contains(match.LongName, "Final") {
+			matchName = match.LongName
+		} else {
+			if strings.Contains(match.NameDetail, "Upper") {
+				playoffDetail += "[serious] The loser of this match will continue in the lower bracket"
+			} else {
+				playoffDetail += "[serious] The loser of this match will be eliminated"
+			}
+		}
+	}
+
+	var script = ""
+	script += fmt.Sprintf(getRandom([]string{"This is %s.", "We're almost ready to start %s.", "%s is almost ready.", "%s will start soon.", "Robots are almost ready for %s.", "The field is almost ready for %s."}), matchName)
+	script += playoffDetail
+
+	log.Printf("script: %s", script)
+
+	return script, nil
+}
+
 func getTeamNumber(id int, team *model.Team) string {
 	if team == nil || team.IntroNumber == "" {
 		return fmt.Sprintf("%d", id)
@@ -95,16 +125,4 @@ func getTeamDescription(team *model.Team, details TeamDetails) string {
 func getRandom(options []string) string {
 	randomIndex := rand.Intn(len(options))
 	return options[randomIndex]
-}
-
-func getMcVoice(say string) string {
-	return "<prosody rate=\"fast\"><google:style name=\"lively\">" + say + "</google:style></prosody>"
-}
-
-func getGaVoice(say string) string {
-	return "<voice name=\"en-US-Neural2-F\">" + say + "</voice>"
-}
-
-func getBreak(durationMs int) string {
-	return fmt.Sprintf("<break time=\"%dms\"/>", durationMs)
 }

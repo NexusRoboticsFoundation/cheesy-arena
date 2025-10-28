@@ -112,7 +112,17 @@ var fieldUnsafe = function () {
 var intro = function (details) {
   websocket.send("intro", {Details: details});
   $("#introControlButtons").hide();
+  $('#postIntroControlButtons').show();
 };
+
+var matchReminder = function () {
+  websocket.send("matchReminder");
+  $('#postIntroControlButtons').hide();
+}
+
+var stopAudio = function () {
+  websocket.send("stopAudio");
+}
 
 // Handles a websocket message to update the teams for the current match.
 var handleMatchLoad = function (data) {
@@ -140,6 +150,7 @@ var handleMatchLoad = function (data) {
   $("#blueScoreSummary .team-3").text(data.Teams["B3"]?.Id);
 
   $("#introControlButtons").show();
+  $('#postIntroControlButtons').hide();
 };
 
 var handleArenaStatus = function (data) {

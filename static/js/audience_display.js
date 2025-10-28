@@ -14,6 +14,7 @@ let blueSide;
 let currentMatch;
 let overlayCenteringHideParams;
 let overlayCenteringShowParams;
+let activeAudio;
 const allianceSelectionTemplate = Handlebars.compile($("#allianceSelectionTemplate").html());
 const sponsorImageTemplate = Handlebars.compile($("#sponsorImageTemplate").html());
 const sponsorTextTemplate = Handlebars.compile($("#sponsorTextTemplate").html());
@@ -287,10 +288,14 @@ const handlePlaySound = function (sound) {
 
 // Handles a websocket message to play generated audio.
 const handlePlayAudio = function (bytes) {
-  const src = `data:audio/mp3;base64,${bytes}`;
-  const audio = new Audio();
-  audio.src = src;
-  audio.play();
+  activeAudio?.pause();
+
+  if(bytes) {
+    const src = `data:audio/mp3;base64,${bytes}`;
+    activeAudio = new Audio();
+    activeAudio.src = src;
+    activeAudio.play();
+  }
 };
 
 // Handles a websocket message to update the alliance selection screen.

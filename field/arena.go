@@ -99,6 +99,7 @@ type Arena struct {
 	breakDescription                  string
 	preloadedTeams                    *[6]*model.Team
 	NextFoulId                        int
+	MatchReminderAudio                *[]byte
 }
 
 type AllianceStation struct {
