@@ -22,6 +22,10 @@ type Team struct {
 	YellowCard      bool
 	HasConnected    bool
 	FtaNotes        string
+	IntroNumber     string
+	IntroNickname   string
+	IntroLocation   string
+	IntroSponsors   string
 }
 
 func (database *Database) CreateTeam(team *Team) error {

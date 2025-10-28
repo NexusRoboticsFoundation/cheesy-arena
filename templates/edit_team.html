@@ -67,6 +67,30 @@ UI for editing team data.
             </div>
           </div>
           <div class="row mb-3">
+            <label class="col-lg-3 control-label">Intro number</label>
+            <div class="col-lg-9">
+              <input type="text" class="form-control" name="introNumber" value="{{.Team.IntroNumber}}">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-lg-3 control-label">Intro nickname</label>
+            <div class="col-lg-9">
+              <input type="text" class="form-control" name="introNickname" value="{{.Team.IntroNickname}}">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-lg-3 control-label">Intro location</label>
+            <div class="col-lg-9">
+              <input type="text" class="form-control" name="introLocation" value="{{.Team.IntroLocation}}">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-lg-3 control-label">Intro sponsors</label>
+            <div class="col-lg-9">
+              <input type="text" class="form-control" name="introSponsors" value="{{.Team.IntroSponsors}}">
+            </div>
+          </div>
+          <div class="row mb-3">
             <label class="col-lg-5 control-label" for="hasConnected">Has Connected to Field?</label>
             <div class="col-lg-1 checkbox">
               <input type="checkbox" id="hasConnected" name="hasConnected" {{if .Team.HasConnected}} checked{{end}}/>

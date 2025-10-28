@@ -285,6 +285,14 @@ const handlePlaySound = function (sound) {
   $("#sound-" + sound)[0].play();
 };
 
+// Handles a websocket message to play generated audio.
+const handlePlayAudio = function (bytes) {
+  const src = `data:audio/mp3;base64,${bytes}`;
+  const audio = new Audio();
+  audio.src = src;
+  audio.play();
+};
+
 // Handles a websocket message to update the alliance selection screen.
 const handleAllianceSelection = function (data) {
   const alliances = data.Alliances;
@@ -808,6 +816,9 @@ $(function () {
     },
     playSound: function (event) {
       handlePlaySound(event.data);
+    },
+    playAudio: function (event) {
+      handlePlayAudio(event.data);
     },
     realtimeScore: function (event) {
       handleRealtimeScore(event.data);

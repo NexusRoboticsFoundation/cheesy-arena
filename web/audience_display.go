@@ -67,6 +67,7 @@ func (web *Web) audienceDisplayWebsocketHandler(w http.ResponseWriter, r *http.R
 		web.arena.MatchTimeNotifier,
 		web.arena.RealtimeScoreNotifier,
 		web.arena.PlaySoundNotifier,
+		web.arena.PlayAudioNotifier,
 		web.arena.ScorePostedNotifier,
 		web.arena.AllianceSelectionNotifier,
 		web.arena.LowerThirdNotifier,

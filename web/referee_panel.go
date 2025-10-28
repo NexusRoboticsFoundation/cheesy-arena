@@ -17,6 +17,7 @@ import (
 	"github.com/Team254/cheesy-arena/field"
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
+	"github.com/Team254/cheesy-arena/voice"
 	"github.com/Team254/cheesy-arena/websocket"
 	"github.com/mitchellh/mapstructure"
 )
@@ -241,6 +242,28 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				continue
 			}
 			web.arena.FieldSafe = false
+		case "intro": 
+			args := struct {
+				Details voice.TeamDetails
+			}{}
+			err = mapstructure.Decode(data, &args)
+			if err != nil {
+				ws.WriteError(err.Error())
+				continue
+			}
+			go func() {
+				script, err := voice.GetMatchIntroScript(web.arena.CurrentMatch, web.arena.GetCurrentTeams(), args.Details)
+				if err != nil {
+					ws.WriteError(fmt.Sprintf("Failed to generate match intro script %s", err))
+					return
+				}
+				audio, err := voice.TextToSpeech(script)
+				if err != nil {
+					ws.WriteError(fmt.Sprintf("Failed to generate match intro audio %s", err))
+					return
+				}
+				web.arena.PlayAudio(audio)
+			}()
 		case "commitMatch":
 			if web.arena.MatchState != field.PostMatch {
 				// Don't allow committing the fouls until the match is over.

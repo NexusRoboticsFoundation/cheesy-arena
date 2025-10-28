@@ -108,6 +108,12 @@ var fieldUnsafe = function () {
   websocket.send("fieldUnsafe");
 };
 
+// Sends a websocket message to auto-intro the match.
+var intro = function (details) {
+  websocket.send("intro", {Details: details});
+  $("#introControlButtons").hide();
+};
+
 // Handles a websocket message to update the teams for the current match.
 var handleMatchLoad = function (data) {
   $("#matchName").text(data.Match.LongName);
@@ -132,6 +138,8 @@ var handleMatchLoad = function (data) {
   $("#blueScoreSummary .team-1").text(data.Teams["B1"]?.Id);
   $("#blueScoreSummary .team-2").text(data.Teams["B2"]?.Id);
   $("#blueScoreSummary .team-3").text(data.Teams["B3"]?.Id);
+
+  $("#introControlButtons").show();
 };
 
 var handleArenaStatus = function (data) {

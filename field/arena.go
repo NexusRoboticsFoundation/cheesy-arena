@@ -933,6 +933,22 @@ func (arena *Arena) preLoadNextMatch() {
 	arena.TeamSigns.SetNextMatchTeams(teamIds)
 }
 
+func (arena *Arena) GetCurrentTeams() [6]*model.Team {
+	teamIds := [6]int{arena.CurrentMatch.Red1, arena.CurrentMatch.Red2, arena.CurrentMatch.Red3, arena.CurrentMatch.Blue1, arena.CurrentMatch.Blue2, arena.CurrentMatch.Blue3}
+	var teams [6]*model.Team
+	var err error
+	for i, teamId := range teamIds {
+		if teamId == 0 {
+			continue
+		}
+		if teams[i], err = arena.Database.GetTeamById(teamId); err != nil {
+			log.Printf("Failed to get model for Team %d: %s", teamId, err.Error())
+		}
+	}
+
+	return teams
+}
+
 // Enable or disable the team ethernet ports on both SCCs
 func (arena *Arena) setSCCEthernetEnabled(enabled bool) {
 	if arena.EventSettings.SCCManagementEnabled {
@@ -1223,6 +1239,10 @@ func (arena *Arena) PlaySound(name string) {
 	if !arena.MuteMatchSounds {
 		arena.PlaySoundNotifier.NotifyWithMessage(name)
 	}
+}
+
+func (arena *Arena) PlayAudio(audio *[]byte) {
+	arena.PlayAudioNotifier.NotifyWithMessage(audio)
 }
 
 func (arena *Arena) positionPostMatchScoreReady(position string) bool {

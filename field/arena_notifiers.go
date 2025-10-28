@@ -25,6 +25,7 @@ type ArenaNotifiers struct {
 	MatchTimeNotifier                  *websocket.Notifier
 	MatchTimingNotifier                *websocket.Notifier
 	PlaySoundNotifier                  *websocket.Notifier
+	PlayAudioNotifier                  *websocket.Notifier
 	RealtimeScoreNotifier              *websocket.Notifier
 	ReloadDisplaysNotifier             *websocket.Notifier
 	ScorePostedNotifier                *websocket.Notifier
@@ -60,6 +61,7 @@ func (arena *Arena) configureNotifiers() {
 	arena.MatchTimeNotifier = websocket.NewNotifier("matchTime", arena.generateMatchTimeMessage)
 	arena.MatchTimingNotifier = websocket.NewNotifier("matchTiming", arena.generateMatchTimingMessage)
 	arena.PlaySoundNotifier = websocket.NewNotifier("playSound", nil)
+	arena.PlayAudioNotifier = websocket.NewNotifier("playAudio", nil)
 	arena.RealtimeScoreNotifier = websocket.NewNotifier("realtimeScore", arena.generateRealtimeScoreMessage)
 	arena.ReloadDisplaysNotifier = websocket.NewNotifier("reload", nil)
 	arena.ScorePostedNotifier = websocket.NewNotifier("scorePosted", arena.GenerateScorePostedMessage)

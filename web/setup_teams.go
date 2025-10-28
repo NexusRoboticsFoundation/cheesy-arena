@@ -8,13 +8,14 @@ package web
 import (
 	"bytes"
 	"fmt"
-	"github.com/Team254/cheesy-arena/model"
-	"github.com/dchest/uniuri"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Team254/cheesy-arena/model"
+	"github.com/dchest/uniuri"
 )
 
 const wpaKeyLength = 8
@@ -182,6 +183,10 @@ func (web *Web) teamEditPostHandler(w http.ResponseWriter, r *http.Request) {
 	team.RookieYear, _ = strconv.Atoi(r.PostFormValue("rookieYear"))
 	team.RobotName = r.PostFormValue("robotName")
 	team.Accomplishments = r.PostFormValue("accomplishments")
+	team.IntroNumber = r.PostFormValue("introNumber")
+	team.IntroNickname = r.PostFormValue("introNickname")
+	team.IntroLocation = r.PostFormValue("introLocation")
+	team.IntroSponsors = r.PostFormValue("introSponsors")
 	if web.arena.EventSettings.NetworkSecurityEnabled {
 		team.WpaKey = r.PostFormValue("wpaKey")
 		if len(team.WpaKey) < 8 || len(team.WpaKey) > 63 {
@@ -315,6 +320,17 @@ func (web *Web) populateOfficialTeamInfo(team *model.Team) error {
 		team.SchoolName = matches[1]
 	}
 	team.RookieYear = tbaTeam.RookieYear
+	team.IntroNumber = fmt.Sprintf("%d", team.Id)
+	numberLength := len(team.IntroNumber)
+	if numberLength == 4 {
+		team.IntroNumber = fmt.Sprintf("%s %s", team.IntroNumber[0:2], team.IntroNumber[2:4])
+	}
+	if numberLength == 3 {
+		team.IntroNumber = fmt.Sprintf("%s %s", team.IntroNumber[0:1], team.IntroNumber[1:3])
+	}
+	team.IntroNickname = tbaTeam.Nickname
+	team.IntroLocation = tbaTeam.City
+	team.IntroSponsors = tbaTeam.Name
 	team.RobotName, err = web.arena.TbaClient.GetRobotName(team.Id, time.Now().Year())
 	if err != nil {
 		return err

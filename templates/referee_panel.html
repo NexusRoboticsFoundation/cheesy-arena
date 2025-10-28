@@ -80,6 +80,16 @@ UI for entering and tracking fouls and red/yellow cards.
     <div class="control-button" id="commitButton" onclick="commitMatch();">Commit & Post</div>
   </div>
 </div>
+<div class="pre-match">
+  <div class="headRef-dependent">
+    <div id="introControlButtons">
+      <button class="btn btn-primary text-white intro-control-button" id="fastIntroButton" onclick="intro(0);">Intro short</button>
+      <button class="btn btn-primary text-white intro-control-button" id="schoolIntroButton" onclick="intro(1);">Intro school</button>
+      <button class="btn btn-primary text-white intro-control-button" id="locationIntroButton" onclick="intro(2);">Intro location</button>
+      <button class="btn btn-primary text-white intro-control-button" id="sponsorIntroButton" onclick="intro(3);">Intro sponsors</button>
+    </div>
+  </div>
+</div>
 <div id="confirmDisable" class="modal">
   <div class="modal-dialog">
     <div class="modal-content">
