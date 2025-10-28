@@ -322,12 +322,20 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 
 				if web.arena.AudienceDisplayMode == "score" {
 					if web.arena.CurrentMatch.Type == model.Playoff {
-						if strings.Contains(web.arena.CurrentMatch.LongName, "Final") {
-							time.Sleep(20 * time.Second)
+						if strings.Contains(web.arena.CurrentMatch.LongName, "Final 2") || strings.Contains(web.arena.CurrentMatch.LongName, "Final 3") {
+							time.Sleep(60 * time.Second)
+
+							if web.arena.AudienceDisplayMode != "score" {
+								return
+							}
 						} else {
 							time.Sleep(10 * time.Second)
 							web.arena.SetAudienceDisplayMode("bracket")
 							time.Sleep(20 * time.Second)
+
+							if web.arena.AudienceDisplayMode != "bracket" {
+								return
+							}
 						}
 					}
 
