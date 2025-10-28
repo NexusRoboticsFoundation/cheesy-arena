@@ -283,6 +283,7 @@ const handlePlaySound = function (sound) {
     v.pause();
     v.currentTime = 0;
   });
+  activeAudio?.pause();
   $("#sound-" + sound)[0].play();
 };
 

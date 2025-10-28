@@ -262,6 +262,10 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 					ws.WriteError(fmt.Sprintf("Failed to generate match intro audio %s", err))
 					return
 				}
+				if web.arena.MatchState != field.PreMatch {
+					log.Printf("Match already in progress, not playing match intro audio")
+					return
+				}
 				log.Printf("Playing match intro audio")
 				web.arena.PlayAudio(audio)
 			}()
@@ -283,6 +287,9 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				log.Printf("Match reminder audio ready")
 			}()
 		case "matchReminder":
+			if web.arena.MatchState != field.PreMatch {
+				return
+			}
 			web.arena.PlayAudio(web.arena.MatchReminderAudio)
 		case "stopAudio":
 			web.arena.PlayAudio(nil)
