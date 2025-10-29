@@ -17,6 +17,7 @@ import (
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
 	"github.com/Team254/cheesy-arena/tournament"
+	"github.com/Team254/cheesy-arena/voice"
 	"github.com/Team254/cheesy-arena/websocket"
 	"github.com/mitchellh/mapstructure"
 )
@@ -385,6 +386,26 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 			}
 			web.arena.CurrentMatch.LongName = name
 			web.arena.MatchLoadNotifier.Notify()
+		case "emceeSay":
+			script, ok := data.(string)
+			if !ok {
+				ws.WriteError(fmt.Sprintf("Failed to parse '%s' message.", messageType))
+				continue
+			}
+			go func() {
+				audio, err := voice.TextToSpeech(script, false)
+				if err != nil {
+					ws.WriteError(fmt.Sprintf("Failed to generate emcee say audio %s", err))
+					log.Printf("Failed to generate emcee say audio %s", err)
+					return
+				}
+				if !(web.arena.MatchState == field.PreMatch || web.arena.MatchState == field.PostMatch) {
+					log.Printf("Match in progress, not playing emcee audio")
+					return
+				}
+				log.Printf("Playing emcee audio: %s", script)
+				web.arena.PlayAudio(audio)
+			}()
 		default:
 			ws.WriteError(fmt.Sprintf("Invalid message type '%s'.", messageType))
 		}

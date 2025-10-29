@@ -113,6 +113,11 @@ const startTimeout = function () {
   websocket.send("startTimeout", durationSec);
 };
 
+const emceeSay = function () {
+  const script = $("#emceeScript").val();
+  websocket.send("emceeSay", script);
+}
+
 const confirmCommit = function () {
   if (isReplay || !scoreIsReady) {
     // Show the appropriate message(s) in the confirmation dialog.
