@@ -18,7 +18,7 @@ const (
 	Sponsors
 )
 
-func GetMatchIntroScript(match *model.Match, teams [6]*model.Team, details TeamDetails) (string, error) {
+func GetMatchIntroScript(match *model.Match, teams [6]*model.Team, details TeamDetails) string {
 	var matchName = "this match"
 	switch match.Type {
 		case model.Practice: matchName = fmt.Sprintf("Practice match %d", match.TypeOrder)
@@ -36,7 +36,7 @@ func GetMatchIntroScript(match *model.Match, teams [6]*model.Team, details TeamD
 		intro = fmt.Sprintf("We've made it to the finals!! Alliance %d is in red, Alliance %d is in blue. Let's meet the teams.", match.PlayoffRedAlliance, match.PlayoffBlueAlliance)
 	}
 
-	script += fmt.Sprintf("%s [1 second pause] On the red alliance, it's team %s!", intro, getTeamNumber(match.Red1, teams[0]))
+	script += fmt.Sprintf("%s [pause] On the red alliance, it's team %s!", intro, getTeamNumber(match.Red1, teams[0]))
 	script += getTeamDescription(teams[0], details)
 	script += fmt.Sprintf("\nEmcee: And their partners team %s!", getTeamNumber(match.Red2, teams[1]))
 	script += getTeamDescription(teams[1], details)
@@ -52,10 +52,10 @@ func GetMatchIntroScript(match *model.Match, teams [6]*model.Team, details TeamD
 
 	log.Printf("script: %s", script)
 
-	return script, nil
+	return script
 }
 
-func GetMatchReminderScript(match *model.Match) (string, error) {
+func GetMatchReminderScript(match *model.Match) string {
 	var matchName = "this match"
 	switch match.Type {
 		case model.Practice: matchName = fmt.Sprintf("Practice match %d", match.TypeOrder)
@@ -82,7 +82,7 @@ func GetMatchReminderScript(match *model.Match) (string, error) {
 
 	log.Printf("script: %s", script)
 
-	return script, nil
+	return script
 }
 
 func getTeamNumber(id int, team *model.Team) string {

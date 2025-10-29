@@ -2,6 +2,7 @@ package voice
 
 import (
 	"context"
+	"time"
 
 	texttospeech "cloud.google.com/go/texttospeech/apiv1"
 	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
@@ -9,7 +10,8 @@ import (
 )
 
 func TextToSpeech(text string, multiSpeaker bool) (*[]byte, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
 
 	client, err := texttospeech.NewClient(ctx, option.WithCredentialsFile("nexus-fms-service-account-key.json"))
 	if err != nil {

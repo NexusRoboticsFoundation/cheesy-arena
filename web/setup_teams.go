@@ -322,6 +322,9 @@ func (web *Web) populateOfficialTeamInfo(team *model.Team) error {
 	team.RookieYear = tbaTeam.RookieYear
 	team.IntroNumber = fmt.Sprintf("%d", team.Id)
 	numberLength := len(team.IntroNumber)
+	if numberLength == 5 {
+		team.IntroNumber = fmt.Sprintf("%s %s %s", team.IntroNumber[0:2], team.IntroNumber[2:3], team.IntroNumber[3:5])
+	}
 	if numberLength == 4 {
 		team.IntroNumber = fmt.Sprintf("%s %s", team.IntroNumber[0:2], team.IntroNumber[2:4])
 	}
@@ -330,7 +333,12 @@ func (web *Web) populateOfficialTeamInfo(team *model.Team) error {
 	}
 	team.IntroNickname = tbaTeam.Nickname
 	team.IntroLocation = tbaTeam.City
-	team.IntroSponsors = tbaTeam.Name
+	splitName := strings.Split(strings.Split(tbaTeam.Name, "&")[0], "/")
+	introSponsors := strings.Join(splitName[0:min(len(splitName), 6)], ", ")
+	if team.SchoolName != "" {
+		introSponsors += " & " + team.SchoolName
+	}
+	team.IntroSponsors = introSponsors
 	team.RobotName, err = web.arena.TbaClient.GetRobotName(team.Id, time.Now().Year())
 	if err != nil {
 		return err

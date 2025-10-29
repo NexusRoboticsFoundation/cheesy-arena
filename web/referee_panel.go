@@ -252,14 +252,11 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				continue
 			}
 			go func() {
-				script, err := voice.GetMatchIntroScript(web.arena.CurrentMatch, web.arena.GetCurrentTeams(), args.Details)
-				if err != nil {
-					ws.WriteError(fmt.Sprintf("Failed to generate match intro script %s", err))
-					return
-				}
+				script := voice.GetMatchIntroScript(web.arena.CurrentMatch, web.arena.GetCurrentTeams(), args.Details)
 				audio, err := voice.TextToSpeech(script, true)
 				if err != nil {
 					ws.WriteError(fmt.Sprintf("Failed to generate match intro audio %s", err))
+					log.Printf("Failed to generate match intro audio %s", err)
 					return
 				}
 				if web.arena.MatchState != field.PreMatch {
@@ -272,14 +269,11 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 			go func() {
 				web.arena.MatchReminderAudio = nil
 
-				reminderScript, err := voice.GetMatchReminderScript(web.arena.CurrentMatch)
-				if err != nil {
-					ws.WriteError(fmt.Sprintf("Failed to generate match reminder script %s", err))
-					return
-				}
+				reminderScript := voice.GetMatchReminderScript(web.arena.CurrentMatch)
 				reminderAudio, err := voice.TextToSpeech(reminderScript, false)
 				if err != nil {
 					ws.WriteError(fmt.Sprintf("Failed to generate match reminder audio %s", err))
+					log.Printf("Failed to generate match reminder audio %s", err)
 					return
 				}
 
