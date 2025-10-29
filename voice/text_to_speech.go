@@ -20,15 +20,15 @@ func TextToSpeech(text string, multiSpeaker bool) (*[]byte, error) {
 	prompt := "Say the following as a fast speaking male emcee for a robotics competition."
 	voice := &texttospeechpb.VoiceSelectionParams{
 			LanguageCode: "en-US",
-			ModelName: "gemini-2.5-flash-tts",
+			ModelName: "gemini-2.5-pro-tts",
 			Name: "Alnilam",
 		}
+
 	if(multiSpeaker) {
-		
-		prompt = "Say the following as an energetic, very fast speaking male emcee for a robotics competition, with team details spoken by a female game announcer that sounds like a professional sports announcer. The game announcer speaks lists of sponsors incredibly quickly and doesn't say \"slash\"."
+		prompt = "Say the following as an energetic, very fast speaking male emcee for a robotics competition, with team details spoken by a female game announcer that sounds like a professional sports announcer. The game announcer speaks lists of sponsors incredibly quickly and doesn't say \"slash\". The emcee says two digit numbers as a single number, not individually and speaks zeros as \"oh\"."
 		voice = &texttospeechpb.VoiceSelectionParams{
 			LanguageCode: "en-US",
-			ModelName: "gemini-2.5-flash-tts",
+			ModelName: "gemini-2.5-pro-tts",
 			MultiSpeakerVoiceConfig: &texttospeechpb.MultiSpeakerVoiceConfig{SpeakerVoiceConfigs: []*texttospeechpb.MultispeakerPrebuiltVoice{&texttospeechpb.MultispeakerPrebuiltVoice{SpeakerAlias: "Emcee", SpeakerId: "Alnilam"}, &texttospeechpb.MultispeakerPrebuiltVoice{SpeakerAlias: "GameAnnouncer", SpeakerId: "Achernar"}}},
 		}
 	}
