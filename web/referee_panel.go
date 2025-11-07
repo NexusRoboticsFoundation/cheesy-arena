@@ -346,6 +346,11 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 						return
 					}
 					if web.arena.CurrentMatch.Type == model.Test {
+						time.Sleep(60 * time.Second)
+						if web.arena.AudienceDisplayMode != "score" {
+							return
+						}
+
 						web.arena.SetAudienceDisplayMode("logoLuma")
 						web.arena.SetAllianceStationDisplayMode("logo")
 						return
