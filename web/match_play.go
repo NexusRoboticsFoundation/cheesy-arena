@@ -10,7 +10,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/Team254/cheesy-arena/field"
@@ -22,11 +21,9 @@ import (
 )
 
 type MatchPlayListItem struct {
-	Id         int
-	ShortName  string
-	Time       string
-	Status     game.MatchStatus
-	ColorClass string
+	Id       int
+	LongName string
+	Status   game.MatchStatus
 }
 
 type MatchPlayList []MatchPlayListItem
@@ -66,6 +63,8 @@ func (web *Web) matchPlayMatchLoadHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	repostScores := r.URL.Query().Get("repost") != ""
+
 	practiceMatches, err := web.buildMatchPlayList(model.Practice)
 	if err != nil {
 		handleWebErr(w, err)
@@ -100,9 +99,11 @@ func (web *Web) matchPlayMatchLoadHandler(w http.ResponseWriter, r *http.Request
 	data := struct {
 		MatchesByType    map[model.MatchType]MatchPlayList
 		CurrentMatchType model.MatchType
+		RepostScores     bool
 	}{
 		matchesByType,
 		currentMatchType,
+		repostScores,
 	}
 	err = template.ExecuteTemplate(w, "match_play_match_load.html", data)
 	if err != nil {
@@ -229,6 +230,8 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 			web.arena.SavedMatch = match
 			web.arena.SavedMatchResult = matchResult
 			web.arena.ScorePostedNotifier.Notify()
+
+			web.arena.SetAudienceDisplayMode("score")
 		case "substituteTeams":
 			args := struct {
 				Red1  int
@@ -307,6 +310,8 @@ func (web *Web) matchPlayWebsocketHandler(w http.ResponseWriter, r *http.Request
 				ws.WriteError(err.Error())
 				continue
 			}
+
+			web.arena.SetAudienceDisplayMode("score")
 		case "discardResults":
 			err = web.arena.ResetMatch()
 			if err != nil {
@@ -527,26 +532,9 @@ func (web *Web) buildMatchPlayList(matchType model.MatchType) (MatchPlayList, er
 	matchPlayList := make(MatchPlayList, len(matches))
 	for i, match := range matches {
 		matchPlayList[i].Id = match.Id
-		matchPlayList[i].ShortName = match.ShortName
-		matchPlayList[i].Time = match.Time.Local().Format("3:04 PM")
+		matchPlayList[i].LongName = match.LongName
 		matchPlayList[i].Status = match.Status
-		switch match.Status {
-		case game.RedWonMatch:
-			matchPlayList[i].ColorClass = "red"
-		case game.BlueWonMatch:
-			matchPlayList[i].ColorClass = "blue"
-		case game.TieMatch:
-			matchPlayList[i].ColorClass = "yellow"
-		default:
-			matchPlayList[i].ColorClass = ""
-		}
-		if web.arena.CurrentMatch != nil && matchPlayList[i].Id == web.arena.CurrentMatch.Id {
-			matchPlayList[i].ColorClass = "green"
-		}
 	}
-
-	// Sort the list to put all completed matches at the bottom.
-	sort.Stable(matchPlayList)
 
 	return matchPlayList, nil
 }

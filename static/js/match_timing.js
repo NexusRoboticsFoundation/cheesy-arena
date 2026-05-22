@@ -33,27 +33,27 @@ const translateMatchTime = function (data, callback) {
   var matchStateText;
   switch (matchStates[data.MatchState]) {
     case "PRE_MATCH":
-      matchStateText = "PRE-MATCH";
+      matchStateText = "Pre-match";
       break;
     case "START_MATCH":
     case "WARMUP_PERIOD":
-      matchStateText = "WARMUP";
+      matchStateText = "Warmup";
       break;
     case "AUTO_PERIOD":
-      matchStateText = "AUTONOMOUS";
+      matchStateText = "Autonomous";
       break;
     case "PAUSE_PERIOD":
-      matchStateText = "PAUSE";
+      matchStateText = "Pause";
       break;
     case "TELEOP_PERIOD":
-      matchStateText = "TELEOPERATED";
+      matchStateText = "Teleoperated";
       break;
     case "POST_MATCH":
-      matchStateText = "POST-MATCH";
+      matchStateText = "Post-match";
       break;
     case "TIMEOUT_ACTIVE":
     case "POST_TIMEOUT":
-      matchStateText = "TIMEOUT";
+      matchStateText = "Timeout";
       break;
   }
   callback(matchStates[data.MatchState], matchStateText, getCountdown(data.MatchState, data.MatchTimeSec));

@@ -1,64 +1,20 @@
 {{define "audience_display_radio_buttons"}}
-<div class="row">
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="blank" onclick="setAudienceDisplay();">
-      Blank
-    </label>
+<div class="list-group">
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('intro');" id="audience-intro">Match intro</button>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('match');" id="audience-match">Match play</button>
+  <div class="list-group-item p-0">
+    <div class="btn-group w-100">
+      <button type="button" class="list-group-item list-group-item-action audience-display-button rounded-0" onclick="setAudienceDisplay('score');" style="border: none;" id="audience-score">Final score <span id="postedMatchName" class="badge text-bg-dark"></span></button>
+      <button type="button" class="btn btn-dark rounded-0 dropdown-toggle dropdown-toggle-split flex-grow-0 audience-display-button" style="min-width: 40px;" data-bs-toggle="dropdown" id="audience-score-dropdown"></button>
+      <ul class="dropdown-menu overflow-y-auto" id="repostListColumn" style="max-height: min(500px, calc(100vh - 200px))"></ul>
+    </div>
   </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="intro" onclick="setAudienceDisplay();" id="introRadio">
-      Match Intro
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="match" onclick="setAudienceDisplay();">
-      Match Play
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="score" onclick="setAudienceDisplay();" id="scoreRadio">
-      Final Score
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="bracket" onclick="setAudienceDisplay();">
-      Bracket
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="logo" onclick="setAudienceDisplay();">
-      Logo With BG
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="logoLuma" onclick="setAudienceDisplay();">
-      Logo Without BG
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="sponsor" onclick="setAudienceDisplay();">
-      Sponsor Reel
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="allianceSelection" onclick="setAudienceDisplay();">
-      Alliance Selection
-    </label>
-  </div>
-  <div>
-    <label>
-      <input type="radio" name="audienceDisplay" value="timeout" onclick="setAudienceDisplay();">
-      Timeout
-    </label>
-  </div>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('bracket');" id="audience-bracket">Bracket</button>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('timeout');" id="audience-timeout">Timeout</button>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('logoLuma');" id="audience-logoLuma">Logo</button>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('logo');" id="audience-logo">Logo w/ background</button>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('sponsor');" id="audience-sponsor">Sponsors</button>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('allianceSelection');" id="audience-allianceSelection">Alliance selection</button>
+  <button type="button" class="list-group-item list-group-item-action audience-display-button" onclick="setAudienceDisplay('blank');" id="audience-blank">Blank</button>
 </div>
 {{end}}

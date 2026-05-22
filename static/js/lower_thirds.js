@@ -47,16 +47,18 @@ var constructLowerThird = function (button) {
 
 // Handles a websocket message to update the audience display screen selector.
 const handleAudienceDisplayMode = function (data) {
-  $("input[name=audienceDisplay]:checked").prop("checked", false);
-  $("input[name=audienceDisplay][value=" + data + "]").prop("checked", true);
+  $(".audience-display-button.active").removeClass("active");
+  $("#audience-" + data).addClass("active");
 };
 
 // Sends a websocket message to change what the audience display is showing.
-const setAudienceDisplay = function () {
-  websocket.send("setAudienceDisplay", $("input[name=audienceDisplay]:checked").val());
+const setAudienceDisplay = function (mode) {
+  websocket.send("setAudienceDisplay", mode);
 };
 
 $(function () {
+  $('#audience-score-dropdown').hide();
+
   // Set up the websocket back to the server.
   websocket = new CheesyWebsocket("/setup/lower_thirds/websocket", {
     audienceDisplayMode: function (event) {

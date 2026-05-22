@@ -48,16 +48,6 @@ const abortMatch = function () {
   websocket.send("abortMatch");
 };
 
-// Sends a websocket message to signal to the volunteers that they may enter the field.
-const signalVolunteers = function () {
-  websocket.send("signalVolunteers");
-};
-
-// Sends a websocket message to signal to the teams that they may enter the field.
-const signalReset = function () {
-  websocket.send("signalReset");
-};
-
 // Sends a websocket message to commit the match score and load the next match.
 const commitResults = function () {
   websocket.send("commitResults");
@@ -68,36 +58,31 @@ const discardResults = function () {
   websocket.send("discardResults");
 };
 
-// Switches the audience display to the match intro screen.
-const showOverlay = function () {
-  $("input[name=audienceDisplay][value=intro]").prop("checked", true);
-  setAudienceDisplay();
-  $("#showOverlay").prop("disabled", true);
-}
-
-// Switches the audience display to the final score screen.
-const showFinalScore = function () {
-  $("input[name=audienceDisplay][value=score]").prop("checked", true);
-  setAudienceDisplay();
-  $("#showFinalScore").prop("disabled", true);
-}
-
 // Sends a websocket message to change what the audience display is showing.
-const setAudienceDisplay = function () {
-  websocket.send("setAudienceDisplay", $("input[name=audienceDisplay]:checked").val());
+const setAudienceDisplay = function (mode) {
+  websocket.send("setAudienceDisplay", mode);
 };
 
 // Sends a websocket message to change what the alliance station display is showing.
-const setAllianceStationDisplay = function () {
-  websocket.send("setAllianceStationDisplay", $("input[name=allianceStationDisplay]:checked").val());
+const setAllianceStationDisplay = function (mode) {
+  if(mode === 'fieldReset') {
+    websocket.send("signalReset");
+    return;
+  } 
+  if(mode === 'signalCount') {
+    websocket.send("signalVolunteers");
+    return;
+  }
+
+  websocket.send("setAllianceStationDisplay", mode);
 };
 
 // Sends a websocket message to start the timeout.
-const startTimeout = function () {
-  const duration = $("#timeoutDuration").val().split(":");
-  let durationSec = parseFloat(duration[0]);
-  if (duration.length > 1) {
-    durationSec = durationSec * 60 + parseFloat(duration[1]);
+const startTimeout = function (duration) {
+  const splitDuration = duration.split(":");
+  let durationSec = parseFloat(splitDuration[0]);
+  if (splitDuration.length > 1) {
+    durationSec = durationSec * 60 + parseFloat(splitDuration[1]);
   }
   websocket.send("startTimeout", durationSec);
 };
@@ -129,30 +114,31 @@ const handleArenaStatus = function (data) {
   // Update the team status view.
   $.each(data.AllianceStations, function (station, stationStatus) {
     const wifiStatus = stationStatus.WifiStatus;
-    $("#status" + station + " .radio-status").text(wifiStatus.TeamId);
+    $("#status" + station + " .radio-status .status-text").text(wifiStatus.TeamId);
 
     if (stationStatus.DsConn) {
       // Format the driver station status box.
       const dsConn = stationStatus.DsConn;
-      $("#status" + station + " .ds-status").attr("data-status-ok", dsConn.DsLinked);
+      $("#status" + station + " .ds-status .status-icon").toggleClass("text-success", dsConn.DsLinked);
       if (dsConn.DsLinked) {
-        $("#status" + station + " .ds-status").text(wifiStatus.MBits.toFixed(2) + "Mb");
+        $("#status" + station + " .ds-status .status-text").text(wifiStatus.MBits.toFixed(2) + "Mb");
       } else {
-        $("#status" + station + " .ds-status").text("");
+        $("#status" + station + " .ds-status .status-text").text("");
       }
 
       // Format the robot status box.
       const robotOkay = dsConn.BatteryVoltage > lowBatteryThreshold && dsConn.RobotLinked;
-      $("#status" + station + " .robot-status").attr("data-status-ok", robotOkay);
+      $("#status" + station + " .robot-status .status-icon").toggleClass("text-success", robotOkay);
       if (stationStatus.DsConn.SecondsSinceLastRobotLink > 1 && stationStatus.DsConn.SecondsSinceLastRobotLink < 1000) {
-        $("#status" + station + " .robot-status").text(stationStatus.DsConn.SecondsSinceLastRobotLink.toFixed());
+        $("#status" + station + " .robot-status .status-text").text(stationStatus.DsConn.SecondsSinceLastRobotLink.toFixed());
       } else {
-        $("#status" + station + " .robot-status").text(dsConn.BatteryVoltage.toFixed(1) + "V");
+        $("#status" + station + " .robot-status .status-text").text(dsConn.BatteryVoltage.toFixed(1) + "V");
       }
     } else {
-      $("#status" + station + " .ds-status").attr("data-status-ok", "");
-      $("#status" + station + " .robot-status").attr("data-status-ok", "");
-      $("#status" + station + " .robot-status").text("");
+      $("#status" + station + " .ds-status .status-icon").toggleClass("text-success", false);
+      $("#status" + station + " .robot-status .status-icon").toggleClass("text-success", false);
+      $("#status" + station + " .robot-status .status-text").text("");
+      $("#status" + station + " .ds-status .status-text").text("");
     }
 
     // Format the radio status box according to whether the AP is configured with the correct SSID and the connection
@@ -166,99 +152,73 @@ const handleArenaStatus = function (data) {
         radioStatus = 1;
       }
     }
-    $(`#status${station} .radio-status`).attr("data-status-ternary", radioStatus);
+    $(`#status${station} .radio-status .status-icon`).toggleClass("text-success", radioStatus == 2);
+    $(`#status${station} .radio-status .status-icon`).toggleClass("bi-wifi-off", radioStatus === 0);
+    $(`#status${station} .radio-status .status-icon`).toggleClass("bi-wifi", radioStatus !== 0);
 
     if (stationStatus.EStop) {
-      $("#status" + station + " .bypass-status").attr("data-status-ok", false);
-      $("#status" + station + " .bypass-status").text("ES");
+      $("#status" + station + " .bypass-status .status-input").prop("checked", true);
+      $("#status" + station + " .bypass-status .status-text").text("E-stopped");
     } else if (stationStatus.AStop) {
-      $("#status" + station + " .bypass-status").attr("data-status-ok", true);
-      $("#status" + station + " .bypass-status").text("AS");
+      $("#status" + station + " .bypass-status .status-input").prop("checked", false);
+      $("#status" + station + " .bypass-status .status-text").text("A-stopped");
     } else if (stationStatus.Bypass) {
-      $("#status" + station + " .bypass-status").attr("data-status-ok", false);
-      $("#status" + station + " .bypass-status").text("B");
+      $("#status" + station + " .bypass-status .status-input").prop("checked", true);
+      $("#status" + station + " .bypass-status .status-text").text(matchStates[data.MatchState] === "PRE_MATCH" ? "Bypassed" : "Disabled");
     } else {
-      $("#status" + station + " .bypass-status").attr("data-status-ok", true);
-      $("#status" + station + " .bypass-status").text("");
+      $("#status" + station + " .bypass-status .status-input").prop("checked", false);
+      $("#status" + station + " .bypass-status .status-text").text(matchStates[data.MatchState] === "PRE_MATCH" ? "Bypass" : "Disable");
     }
+
+    $(`#status${station} .status-container`).toggleClass("border-warning", radioStatus != 2 || !stationStatus.DsConn?.DsLinked || !stationStatus.DsConn?.RobotLinked);
   });
 
   // Enable/disable the buttons based on the current match state.
   switch (matchStates[data.MatchState]) {
     case "PRE_MATCH":
-      $("#startMatch").prop("disabled", !data.CanStartMatch);
-      $("#abortMatch").prop("disabled", true);
-      $("#signalVolunteers").prop("disabled", false);
-      $("#signalReset").prop("disabled", false);
-      $("#fieldResetRadio").prop("disabled", false);
-      $("#commitResults").prop("disabled", true);
-      $("#discardResults").prop("disabled", true);
-      $("#editResults").prop("disabled", true);
-      $("#startTimeout").prop("disabled", false);
+      $("#startMatch").show().prop("disabled", !data.CanStartMatch);
+      $("#abortMatch").hide();
+      $(".btn-post-match").hide();
+      $(".btn-pre-match").show();
+      $(".audience-display-button").prop("disabled", false);
+      $(".alliance-station-display-button").prop("disabled", false);
       break;
     case "START_MATCH":
     case "WARMUP_PERIOD":
     case "AUTO_PERIOD":
     case "PAUSE_PERIOD":
     case "TELEOP_PERIOD":
-      $("#showOverlay").prop("disabled", true);
-      $("#introRadio").prop("disabled", true);
-      $("#showFinalScore").prop("disabled", true);
-      $("#scoreRadio").prop("disabled", true);
-      $("#startMatch").prop("disabled", true);
-      $("#abortMatch").prop("disabled", false);
-      $("#signalVolunteers").prop("disabled", true);
-      $("#signalReset").prop("disabled", true);
-      $("#fieldResetRadio").prop("disabled", true);
-      $("#commitResults").prop("disabled", true);
-      $("#discardResults").prop("disabled", true);
-      $("#editResults").prop("disabled", true);
-      $("#startTimeout").prop("disabled", true);
+      $("#startMatch").hide();
+      $("#abortMatch").show().prop("disabled", false);
+      $(".btn-post-match").hide();
+      $(".btn-pre-match").hide();
+      $(".audience-display-button").prop("disabled", true);
+      $(".alliance-station-display-button").prop("disabled", true);
+      $("#substituteTeams").hide();
       break;
     case "POST_MATCH":
-      $("#showOverlay").prop("disabled", true);
-      $("#introRadio").prop("disabled", true);
-      $("#showFinalScore").prop("disabled", true);
-      $("#scoreRadio").prop("disabled", true);
-      $("#startMatch").prop("disabled", true);
-      $("#abortMatch").prop("disabled", true);
-      $("#signalVolunteers").prop("disabled", false);
-      $("#signalReset").prop("disabled", false);
-      $("#fieldResetRadio").prop("disabled", false);
-      $("#commitResults").prop("disabled", false);
-      $("#discardResults").prop("disabled", false);
-      $("#editResults").prop("disabled", false);
-      $("#startTimeout").prop("disabled", true);
+      $("#startMatch").show().prop("disabled", true);
+      $("#abortMatch").hide();
+      $(".btn-post-match").show();
+      $(".btn-pre-match").hide();
+      $(".audience-display-button").prop("disabled", false);
+      $(".alliance-station-display-button").prop("disabled", false);
       break;
     case "TIMEOUT_ACTIVE":
-      $("#showOverlay").prop("disabled", true);
-      $("#introRadio").prop("disabled", true);
-      $("#showFinalScore").prop("disabled", false);
-      $("#scoreRadio").prop("disabled", false);
-      $("#startMatch").prop("disabled", true);
-      $("#abortMatch").prop("disabled", false);
-      $("#signalVolunteers").prop("disabled", true);
-      $("#signalReset").prop("disabled", true);
-      $("#fieldResetRadio").prop("disabled", false);
-      $("#commitResults").prop("disabled", true);
-      $("#discardResults").prop("disabled", true);
-      $("#editResults").prop("disabled", true);
-      $("#startTimeout").prop("disabled", true);
+      $("#startMatch").hide();
+      $("#abortMatch").show().prop("disabled", false);
+      $(".btn-post-match").hide();
+      $(".btn-pre-match").hide();
+      $(".audience-display-button").prop("disabled", false);
+      $(".alliance-station-display-button").prop("disabled", false);
       break;
     case "POST_TIMEOUT":
-      $("#showOverlay").prop("disabled", false);
-      $("#introRadio").prop("disabled", false);
-      $("#showFinalScore").prop("disabled", false);
-      $("#scoreRadio").prop("disabled", false);
-      $("#startMatch").prop("disabled", true);
-      $("#abortMatch").prop("disabled", true);
-      $("#signalVolunteers").prop("disabled", true);
-      $("#signalReset").prop("disabled", true);
-      $("#fieldResetRadio").prop("disabled", false);
-      $("#commitResults").prop("disabled", true);
-      $("#discardResults").prop("disabled", true);
-      $("#editResults").prop("disabled", true);
-      $("#startTimeout").prop("disabled", true);
+      $("#startMatch").show().prop("disabled", true);
+      $("#abortMatch").hide();
+      $(".btn-post-match").hide();
+      $(".btn-pre-match").hide();
+      $(".audience-display-button").prop("disabled", false);
+      $(".alliance-station-display-button").prop("disabled", false);
       break;
   }
 
@@ -287,6 +247,10 @@ const handleMatchLoad = function (data) {
   fetch("/match_play/match_load")
     .then(response => response.text())
     .then(html => $("#matchListColumn").html(html));
+    
+  fetch("/match_play/match_load?repost=true")
+    .then(response => response.text())
+    .then(html => $("#repostListColumn").html(html));
 
   $("#matchName").text(data.Match.LongName);
   $("#testMatchName").val(data.Match.LongName);
@@ -296,12 +260,10 @@ const handleMatchLoad = function (data) {
     teamId.val(team ? team.Id : "");
     teamId.prop("disabled", !data.AllowSubstitution);
   });
-  $("#playoffRedAllianceInfo").html(formatPlayoffAllianceInfo(data.Match.PlayoffRedAlliance, data.RedOffFieldTeams));
-  $("#playoffBlueAllianceInfo").html(formatPlayoffAllianceInfo(data.Match.PlayoffBlueAlliance, data.BlueOffFieldTeams));
+  $("#playoffRedAllianceInfo").html(formatPlayoffAllianceInfo(data.Match.PlayoffRedAlliance, data.RedOffFieldTeams, 'Red'));
+  $("#playoffBlueAllianceInfo").html(formatPlayoffAllianceInfo(data.Match.PlayoffBlueAlliance, data.BlueOffFieldTeams, 'Blue'));
 
-  $("#substituteTeams").prop("disabled", true);
-  $("#showOverlay").prop("disabled", false);
-  $("#introRadio").prop("disabled", false);
+  $("#substituteTeams").hide();
   $("#muteMatchSounds").prop("checked", false);
 }
 
@@ -321,20 +283,13 @@ const handleRealtimeScore = function (data) {
 
 // Handles a websocket message to populate the final score data.
 const handleScorePosted = function (data) {
-  let matchName = data.Match.LongName;
-  if (matchName) {
-    $("#showFinalScore").prop("disabled", false);
-    $("#scoreRadio").prop("disabled", false);
-  } else {
-    matchName = "None"
-  }
-  $("#savedMatchName").html(matchName);
+  $("#postedMatchName").text(data.Match.LongName || 'none');
 }
 
 // Handles a websocket message to update the audience display screen selector.
 const handleAudienceDisplayMode = function (data) {
-  $("input[name=audienceDisplay]:checked").prop("checked", false);
-  $("input[name=audienceDisplay][value=" + data + "]").prop("checked", true);
+  $(".audience-display-button.active").removeClass("active");
+  $("#audience-" + data).addClass("active");
 };
 
 // Handles a websocket message to signal whether the referee and scorers have committed after the match.
@@ -346,7 +301,7 @@ const handleScoringStatus = function (data) {
       break;
     }
   }
-  $("#refereeScoreStatus").attr("data-ready", data.RefereeScoreReady);
+
   updateScoreStatus(data, "red_near", "#redNearScoreStatus", "Red Near");
   updateScoreStatus(data, "red_far", "#redFarScoreStatus", "Red Far");
   updateScoreStatus(data, "blue_near", "#blueNearScoreStatus", "Blue Near");
@@ -363,8 +318,8 @@ const updateScoreStatus = function (data, position, element, displayName) {
 
 // Handles a websocket message to update the alliance station display screen selector.
 const handleAllianceStationDisplayMode = function (data) {
-  $("input[name=allianceStationDisplay]:checked").prop("checked", false);
-  $("input[name=allianceStationDisplay][value=" + data + "]").prop("checked", true);
+  $(".alliance-station-display-button.active").removeClass("active");
+  $("#alliance-station-" + data).addClass("active");
 };
 
 // Handles a websocket message to update the event status message.
@@ -377,11 +332,11 @@ const handleEventStatus = function (data) {
   $("#earlyLateMessage").text(data.EarlyLateMessage);
 };
 
-const formatPlayoffAllianceInfo = function (allianceNumber, offFieldTeams) {
+const formatPlayoffAllianceInfo = function (allianceNumber, offFieldTeams, color) {
   if (allianceNumber === 0) {
-    return "";
+    return `${color} alliance`;
   }
-  let allianceInfo = `<b>Alliance ${allianceNumber}</b>`;
+  let allianceInfo = `Alliance ${allianceNumber}`;
   if (offFieldTeams.length > 0) {
     allianceInfo += ` (not on field: ${offFieldTeams.map(team => team.Id).join(", ")})`;
   }

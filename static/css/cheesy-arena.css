@@ -8,8 +8,8 @@
   cursor: default;
 }
 .btn[disabled] {
-  color: #000;
-  opacity: 0.2;
+  color: var(--bs-dark);
+  opacity: 0.3;
 }
 
 /* New styles. */
@@ -52,24 +52,6 @@
 .modal-large {
   width: 60%;
 }
-.team-number {
-  height: 27px;
-}
-.ds-status, .radio-status, .robot-status, .bypass-status {
-  background-color: #aaa;
-  color: #000;
-  border: 1px solid #999;
-  border-radius: 4px;
-  padding: 0px;
-  width: 60px;
-  height: 27px;
-  line-height: 25px;
-  font-size: 14px;
-  margin: 0 auto;
-}
-.bypass-status {
-  cursor: pointer;
-}
 [data-status-ok="true"], [data-status-ternary="2"] {
   background-color: #0e8;
 }
@@ -83,22 +65,17 @@
   background-color: #960;
 }
 .btn-match-play {
-  width: 170px;
-  height: 50px;
-  line-height: 36px;
-  font-size: 16px;
-}
-.btn-match-play-narrow {
-  width: 139px;
+  min-width: 180px;
+  font-weight: bold;
 }
 .badge-scoring {
-  background-color: #e66;
+  background-color: #666;
 }
-.badge-scoring[data-ready=true] {
+.badge-scoring[data-ready=true], .badge-status[data-ready=true] {
   background-color: #0c6;
 }
 .badge-scoring[data-present=false] {
-  background-color: #666;
+  background-color: #e66;
 }
 .badge-status {
   background-color: #e66;
@@ -111,9 +88,6 @@
 }
 .badge-status[data-status=ACTIVE] {
   background-color: #0c6;
-}
-.badge-saved-match {
-  background-color: #666;
 }
 .nowrap {
   white-space: nowrap;
@@ -143,28 +117,8 @@ td[data-plc-value="true"] {
   width: 190px;
   text-align: left;
 }
-.btn-purple {
-  background-color: #90c;
-}
-.btn-purple:hover {
-  background-color: #80b;
-}
-.btn-purple[disabled] {
-  background-color: #639;
-}
 input[data-changed="true"], select[data-changed="true"] {
   border: 2px solid #f00;
-}
-.match-list {
-  height: 610px;
-  overflow-y: auto;
-}
-.match-list th {
-  position: sticky;
-  top: 0;
-}
-#testMatchSettings {
-  display: none;
 }
 
 /* Placeholder styles for input fields*/
@@ -178,4 +132,8 @@ input[data-changed="true"], select[data-changed="true"] {
     color: #ff0000; /* Red placeholder text */
     font-style: italic;
     opacity: 0.4;
+}
+
+.flex-basis-0 {
+  flex-basis: 0;
 }

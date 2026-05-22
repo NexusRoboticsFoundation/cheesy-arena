@@ -85,7 +85,7 @@ h3 {
   width: 8vw;
   padding: 0.2vw 0.5vw;
   border-radius: 0.5vw;
-  background-color: #e66;
+  background-color: #666;
   font-size: 0.8vw;
   color: #000;
 }
@@ -93,7 +93,7 @@ h3 {
   background-color: #0c6;
 }
 .scoring-status[data-present=false] {
-  background-color: #666;
+  background-color: #e66;
 }
 #fouls {
   display: flex;
