@@ -10,9 +10,11 @@
 {{else}}
 <li><button class="dropdown-item" onclick="loadMatch(0);">Test match</button></li>
 {{range $type, $matches := .MatchesByType}}
+{{if $matches}}
 <li><hr class="dropdown-divider"></li>
 {{range $match := $matches}}
 <li><button class="dropdown-item {{if $match.Status}}text-body-secondary{{end}}" onclick="loadMatch({{$match.Id}});">{{$match.LongName}} {{if $match.Status}}<i class="bi-check"></i>{{end}}</button></li>
+{{end}}
 {{end}}
 {{end}}
 {{end}}

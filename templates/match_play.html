@@ -14,54 +14,37 @@ UI for controlling match play and viewing team connection and field status.
       <div class="flex-grow-1"></div>
       <b id="matchTime" data-bs-toggle="tooltip" title="Match timer (seconds)">&nbsp;</b>
     </div>
-    <div class="d-flex flex-row gap-3 mb-4">
-      <button type="button" id="startMatch" class="btn btn-success btn-lg btn-match-play" style="display: none;" onclick="startMatch();" disabled>
-        Start
-      </button>
-      <button type="button" id="abortMatch" class="btn btn-danger btn-lg btn-match-play" onclick="abortMatch();">
-        Abort
-      </button>
-      <button type="button" id="substituteTeams" class="btn btn-primary btn-lg btn-match-play" style="display: none;" onclick="substituteTeams();">
-        Substitute
-      </button>
-
-      <div class="flex-grow-1"></div>
-
-      <div class="btn-group">
-        <button type="button" class="btn btn-secondary btn-lg btn-match-play btn-pre-match dropdown-toggle" data-bs-toggle="dropdown">
-          Start timeout
+    <div class="d-flex flex-column flex-md-row flex-wrap gap-3 mb-4 justify-content-between">
+      <div class="d-flex flex-row gap-3">
+        <button type="button" id="startMatch" class="btn btn-success btn-lg btn-match-play" style="display: none;" onclick="startMatch();" disabled>
+          Start
         </button>
-        <div class="dropdown-menu">
-          <button class="dropdown-item" type="button" onclick="startTimeout('6:00');">6 minutes</button>
-          <button class="dropdown-item" type="button" onclick="startTimeout('10:00');">10 minutes</button>
-          <button class="dropdown-item" type="button" onclick="startTimeout('15:00');">15 minutes</button>
-          <div class="px-2 pt-1">
-            <div class="input-group">
-              <input class="form-control" type="text" id="timeoutDuration" size="4" value="8:00"/>
-              <button type="button" id="startTimeout" class="btn btn-primary btn-sm" onclick="startTimeout($('#timeoutDuration').val());">
-                Start
-              </button>
-            </div>
-          </div>
+        <button type="button" id="abortMatch" class="btn btn-danger btn-lg btn-match-play" onclick="abortMatch();">
+          Abort
+        </button>
+        <button type="button" id="substituteTeams" class="btn btn-primary btn-lg btn-match-play" style="display: none;" onclick="substituteTeams();">
+          Substitute
+        </button>
+      </div>
+      
+      <div class="d-flex flex-row flex-wrap gap-3">
+        <div class="btn-group btn-pre-match">
+          <button type="button" class="btn btn-secondary btn-lg btn-match-play dropdown-toggle" data-bs-toggle="dropdown">
+            Load match
+          </button>
+          <ul class="dropdown-menu overflow-y-auto" id="matchListColumn" style="max-height: min(500px, calc(100vh - 200px))"></ul>
         </div>
-      </div>
 
-      <div class="btn-group">
-        <button type="button" class="btn btn-secondary btn-lg btn-match-play btn-pre-match dropdown-toggle" data-bs-toggle="dropdown">
-          Load match
+        <button type="button" id="commitResults" class="btn btn-primary btn-lg btn-match-play btn-post-match" style="display: none;" onclick="confirmCommit();">
+          Commit &amp; post
         </button>
-        <ul class="dropdown-menu overflow-y-auto" id="matchListColumn" style="max-height: min(500px, calc(100vh - 200px))"></ul>
+        <a type="button" id="editResults" class="btn btn-secondary btn-lg btn-match-play btn-post-match" style="display: none;" href="/match_review/current/edit">
+          Edit
+        </a>
+        <button type="button" id="discardResults" class="btn btn-danger btn-lg btn-match-play btn-post-match" style="display: none;" onclick="$('#confirmDiscardResults').modal('show');">
+          Discard
+        </button>
       </div>
-
-      <button type="button" id="commitResults" class="btn btn-primary btn-lg btn-match-play btn-post-match" style="display: none;" onclick="confirmCommit();">
-        Commit &amp; post
-      </button>
-      <a type="button" id="editResults" class="btn btn-secondary btn-lg btn-match-play btn-post-match" style="display: none;" href="/match_review/current/edit">
-        Edit
-      </a>
-      <button type="button" id="discardResults" class="btn btn-danger btn-lg btn-match-play btn-post-match" style="display: none;" onclick="$('#confirmDiscardResults').modal('show');">
-        Discard
-      </button>
     </div>
     <div class="d-flex flex-column flex-lg-row gap-3 mb-3">
       <div class="d-flex flex-column flex-grow-1 flex-basis-0">
@@ -69,7 +52,7 @@ UI for controlling match play and viewing team connection and field status.
           <h6 id="playoffBlueAllianceInfo">
             Blue alliance
           </h6>
-          <h6 id="blueScore" class="badge text-bg-light" data-bs-toggle="tooltip" title="Blue score">&nbsp;</h6>
+          <h6 id="blueScore" class="badge bg-light-subtle" data-bs-toggle="tooltip" title="Blue score">&nbsp;</h6>
         </div>
         <div class="rounded p-3 bg-primary-subtle d-flex flex-column gap-2">
           {{template "matchPlayTeam" dict "color" "B" "position" 1}}
@@ -82,7 +65,7 @@ UI for controlling match play and viewing team connection and field status.
           <h6 id="playoffRedAllianceInfo">
             Red alliance
           </h6>
-          <h6 id="redScore" class="badge text-bg-light" data-bs-toggle="tooltip" title="Red score">&nbsp;</h6>
+          <h6 id="redScore" class="badge bg-light-subtle" data-bs-toggle="tooltip" title="Red score">&nbsp;</h6>
         </div>
         <div class="rounded p-3 bg-danger-subtle d-flex flex-column gap-2">
           {{template "matchPlayTeam" dict "color" "R" "position" 3}}
@@ -96,7 +79,7 @@ UI for controlling match play and viewing team connection and field status.
         <div class="col-6 col-md-4 col-lg-3">
           <h6>Audience display</h6>
           {{template "audience_display_radio_buttons"}}
-          <div class="form-check mt-2 mx-3">
+          <div class="form-check mt-2 mb-3 mx-3">
             <input type="checkbox" id="muteMatchSounds" class="form-check-input">
             <label class="form-check-label" for="muteMatchSounds">
               Mute match sounds
@@ -149,6 +132,15 @@ UI for controlling match play and viewing team connection and field status.
             {{end}}
           </p>
           {{end}}
+
+          <div class="mb-3 btn-pre-match" style="display: none;">
+            <label class="form-label h6" for="breakDuration">Break</label>
+            <div class="input-group" style="max-width: 250px;">
+              <input type="text" class="form-control" id="breakDuration" value="6:00" />
+              <button class="btn btn-outline-secondary" onclick="startTimeout($('#breakDuration').val());" type="button">Start</button>
+            </div>
+          </div>
+
           <div id="testMatchSettings" class="mb-3" style="display: none;">
             <label class="form-label h6" for="testMatchName">Match name</label>
             <input type="text" class="form-control" id="testMatchName" onblur="setTestMatchName();" style="max-width: 250px;"/>
@@ -219,7 +211,7 @@ UI for controlling match play and viewing team connection and field status.
   </div>
   <div class="d-flex flex-row gap-2 align-items-center flex-grow-1 bg-body-tertiary rounded px-2 overflow-hidden border status-container" style="height: 38px;">
     <div class="d-flex flex-row gap-2 align-items-center ds-status flex-grow-1 flex-basis-0">
-      <i class="bi-laptop status-icon fs-4" data-bs-toggle="tooltip" title="DS status"></i>
+      <i class="bi-laptop status-icon fs-4" data-bs-toggle="tooltip" title="Driver station status"></i>
       <div class="status-text text-body-secondary d-none d-sm-block d-lg-none d-xl-block" data-bs-toggle="tooltip" title="Bandwidth consumed"></div>
     </div>
     <div class="d-flex flex-row gap-2 align-items-center radio-status flex-grow-1 flex-basis-0">
