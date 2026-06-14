@@ -76,7 +76,7 @@ UI for controlling match play and viewing team connection and field status.
     </div>
     <div class="mb-3">
       <div class="row">
-        <div class="col-6 col-md-4 col-lg-3">
+        <div class="col-6 col-md-4 col-lg-3 mb-3">
           <h6>Audience display</h6>
           {{template "audience_display_radio_buttons"}}
         </div>
@@ -98,7 +98,7 @@ UI for controlling match play and viewing team connection and field status.
             <span id="earlyLateMessage"></span>
           </p>
           <h6>Scoring</h6>
-          <p><span class="badge badge-scoring" id="redScoreStatus"></span><br/>
+          <p><span class="badge badge-scoring" id="redScoreStatus"></span>
             <span class="badge badge-scoring" id="blueScoreStatus"></span></p>
           {{if .EventSettings.NetworkSecurityEnabled}}
           <h6>Network Status</h6>
@@ -122,71 +122,24 @@ UI for controlling match play and viewing team connection and field status.
           </p>
           {{end}}
 
-          <div class="mb-3 btn-pre-match" style="display: none;">
+          <div class="mb-3" style="max-width: 250px;">
             <label class="form-label h6" for="breakDuration">Break</label>
-            <div class="input-group" style="max-width: 250px;">
+            <div class="input-group mb-3 btn-pre-match" style="display: none;">
               <input type="text" class="form-control" id="breakDuration" value="6:00" />
               <button class="btn btn-outline-secondary" onclick="startTimeout($('#breakDuration').val());" type="button">Start</button>
             </div>
-            <div>
-              <label>
-                <input type="radio" name="allianceStationDisplay" value="match"
-                  onclick="setAllianceStationDisplay();"> Match
-              </label>
-            </div>
-            <div>
-              <label>
-                <input type="radio" name="allianceStationDisplay" value="logo"
-                  onclick="setAllianceStationDisplay();"> Logo/Awards
-              </label>
-            </div>
-            <div>
-              <label>
-                <input type="radio" name="allianceStationDisplay" value="timeout"
-                  onclick="setAllianceStationDisplay();"> Timeout
-              </label>
-            </div>
-            <div>
-              <label>
-                <input type="radio" name="allianceStationDisplay" value="fieldReset"
-                  onclick="setAllianceStationDisplay();" id="fieldResetRadio"> Field Reset
-              </label>
-            </div>
-            <div>
-              <label>
-                <input type="radio" name="allianceStationDisplay" value="signalCount"
-                  onclick="setAllianceStationDisplay();" id="fieldResetRadio"> Signal Count
-              </label>
-            </div>
+            <input class="form-control mb-3" type="text" id="timeoutDescription" size="16" value="Field Break" onblur="setTimeoutDisplay();"/>
+            <input class="form-control" type="text" id="timeoutNextMatchText" size="16" placeholder="Next Up" onblur="setTimeoutDisplay();"/>
           </div>
-          <h6 class="mt-4">Shown Match Result</h6>
-          <span class="badge badge-saved-match" id="savedMatchName">None</span>
-          &nbsp;
-          <b class="btn btn-primary btn-sm" onclick="showResult(0);">Clear</b>
-        </div>
-        <div class="col-lg-3">
-          <h6>Match Sounds</h6>
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" id="muteMatchSounds">
-              Mute
-            </label>
-          </div>
-          <h6 class="mt-4">Timeout</h6>
-          <input type="text" id="timeoutDuration" size="4" value="8:00"/>
-          <button type="button" id="startTimeout" class="btn btn-primary btn-sm" onclick="startTimeout();">
-            Start
-          </button>
-          <div class="mb-1">
-            <input type="text" id="timeoutDescription" size="16" value="Field Break" onblur="setTimeoutDisplay();"/>
-          </div>
-          <div>
-            <input type="text" id="timeoutNextMatchText" size="16" placeholder="Next Up" onblur="setTimeoutDisplay();"/>
-          </div>
-          <div id="testMatchSettings">
-            <br/><br/>
-            <p>Match Name</p>
-            <input type="text" id="testMatchName" size="16" onblur="setTestMatchName();"/>
+          <div id="testMatchSettings" class="mb-3" style="display: none;">
+            <label class="form-label h6" for="testMatchName">Match name</label>
+            <input type="text" class="form-control mb-3" id="testMatchName" onblur="setTestMatchName();" style="max-width: 250px;"/>
+            <div class="form-check">
+              <input type="checkbox" id="muteMatchSounds" class="form-check-input">
+              <label class="form-check-label" for="muteMatchSounds">
+                Mute match sounds
+              </label>
+            </div>
           </div>
         </div>
       </div>
