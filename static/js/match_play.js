@@ -48,9 +48,9 @@ const abortMatch = function () {
   websocket.send("abortMatch");
 };
 
-// Sends a websocket message to commit the match score and load the next match.
-const commitResults = function () {
-  websocket.send("commitResults");
+// Sends a websocket message to commit and post the match score, and load the next match.
+const commitAndPost = function () {
+  websocket.send("commitAndPost");
 };
 
 // Sends a websocket message to discard the match score and load the next match.
@@ -84,7 +84,19 @@ const startTimeout = function (duration) {
   if (splitDuration.length > 1) {
     durationSec = durationSec * 60 + parseFloat(splitDuration[1]);
   }
-  websocket.send("startTimeout", durationSec);
+  websocket.send("startTimeout", {
+    Description: $("#timeoutDescription").val(),
+    NextMatchName: $("#timeoutNextMatchText").val(),
+    DurationSec: durationSec,
+  });
+};
+
+// Sends a websocket message to update timeout display text.
+const setTimeoutDisplay = function () {
+  websocket.send("setTimeoutDisplay", {
+    Description: $("#timeoutDescription").val(),
+    NextMatchName: $("#timeoutNextMatchText").val(),
+  });
 };
 
 const confirmCommit = function () {
@@ -94,7 +106,7 @@ const confirmCommit = function () {
     $("#confirmCommitNotReady").css("display", scoreIsReady ? "none" : "block");
     $("#confirmCommitResults").modal("show");
   } else {
-    commitResults();
+    commitAndPost();
   }
 };
 
@@ -184,7 +196,6 @@ const handleArenaStatus = function (data) {
       $(".alliance-station-display-button").prop("disabled", false);
       break;
     case "START_MATCH":
-    case "WARMUP_PERIOD":
     case "AUTO_PERIOD":
     case "PAUSE_PERIOD":
     case "TELEOP_PERIOD":
@@ -254,6 +265,8 @@ const handleMatchLoad = function (data) {
 
   $("#matchName").text(data.Match.LongName);
   $("#testMatchName").val(data.Match.LongName);
+  $("#timeoutDescription").val(data.BreakDescription || "Field Break");
+  $("#timeoutNextMatchText").val(data.BreakNextMatchName || "");
   $("#testMatchSettings").toggle(data.Match.Type === matchTypeTest);
   $.each(data.Teams, function (station, team) {
     const teamId = $(`#status${station} .team-number`);
@@ -302,10 +315,8 @@ const handleScoringStatus = function (data) {
     }
   }
 
-  updateScoreStatus(data, "red_near", "#redNearScoreStatus", "Red Near");
-  updateScoreStatus(data, "red_far", "#redFarScoreStatus", "Red Far");
-  updateScoreStatus(data, "blue_near", "#blueNearScoreStatus", "Blue Near");
-  updateScoreStatus(data, "blue_far", "#blueFarScoreStatus", "Blue Far");
+  updateScoreStatus(data, "red", "#redScoreStatus", "Red");
+  updateScoreStatus(data, "blue", "#blueScoreStatus", "Blue");
 };
 
 // Helper function to update a badge that shows scoring panel commit status.
