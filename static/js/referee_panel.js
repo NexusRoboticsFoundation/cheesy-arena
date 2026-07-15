@@ -85,6 +85,16 @@ var signalReset = function () {
   websocket.send("signalReset");
 };
 
+// Sends a websocket message to unlock match start.
+var fieldSafeToStart = function () {
+  websocket.send("fieldSafeToStart");
+};
+
+// Sends a websocket message to lock match start.
+var fieldNotSafeToStart = function () {
+  websocket.send("fieldNotSafeToStart");
+};
+
 // Shows confirmation modal if not all scores are ready, otherwise directly commits and posts.
 var confirmCommit = function () {
   if (scoreIsReady) {
@@ -247,7 +257,9 @@ const hashObject = function (object) {
 $(function () {
   // Read the configuration for this display from the URL query string.
   var urlParams = new URLSearchParams(window.location.search);
-  $(".headRef-dependent").attr("data-hr", urlParams.get("hr"));
+  const hrParam = urlParams.get("hr");
+  const isHeadRef = !hrParam || hrParam === 'true';
+  $(".headRef-dependent").attr("data-hr", hrParam);
 
   // Set up the websocket back to the server.
   websocket = new CheesyWebsocket("/panels/referee/websocket", {
@@ -267,4 +279,20 @@ $(function () {
       handleArenaStatus(event.data);
     },
   });
+
+  if(isHeadRef) {
+    // The keycode assigned to the physical USB button attached to the head ref device.
+    const FIELD_SAFE_KEY = 'F16';
+    $(document).on('keydown', function(event) {
+      if (event.key === FIELD_SAFE_KEY) {
+        fieldSafeToStart();
+      }
+    });
+
+    $(document).on('keyup', function(event) {
+      if (event.key === FIELD_SAFE_KEY) {
+        fieldNotSafeToStart();
+      }
+    });
+  }
 });

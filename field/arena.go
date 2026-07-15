@@ -84,6 +84,7 @@ type Arena struct {
 	EventStatus                       EventStatus
 	FieldVolunteers                   bool
 	FieldReset                        bool
+	FieldSafeToStart                  time.Time
 	AudienceDisplayMode               string
 	SavedMatch                        *model.Match
 	SavedMatchResult                  *model.MatchResult
@@ -536,6 +537,7 @@ func (arena *Arena) StartMatch() error {
 		arena.lastTeamLogTime = time.Time{}
 
 		arena.MatchState = StartMatch
+		arena.FieldSafeToStart = time.Time{}
 
 		if arena.EventSettings.NexusAutoQueueEnabled && arena.CurrentMatch.Type != model.Test {
 			go arena.NexusClient.MatchStarted(arena.CurrentMatch.LongName, arena.CurrentMatch.TypeOrder)
@@ -1124,6 +1126,14 @@ func (arena *Arena) checkCanStartMatch() error {
 		}
 	}
 
+	if arena.FieldSafeToStart.IsZero() {
+		return fmt.Errorf("cannot start match until head ref marks field as safe")
+	} else {
+		if time.Since(arena.FieldSafeToStart) >= 500*time.Millisecond {
+			return fmt.Errorf("cannot start match until head ref marks field as safe again")
+		}
+	}
+
 	return nil
 }
 
@@ -1235,6 +1245,9 @@ func (arena *Arena) handlePlcInputOutput() {
 	case PreMatch:
 		if arena.lastMatchState != PreMatch {
 			arena.Plc.SetFieldResetLight(true)
+		}
+		if arena.Plc.IsFtaReady() && arena.checkCanStartMatch() == nil {
+			arena.StartMatch()
 		}
 		fallthrough
 	case TimeoutActive:
