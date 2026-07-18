@@ -239,7 +239,10 @@ const handlePlaySound = function (sound) {
     v.pause();
     v.currentTime = 0;
   });
-  $("#sound-" + sound)[0].play();
+
+  if(sound) {
+    $("#sound-" + sound)[0].play();
+  }
 };
 
 // Handles a websocket message to update the alliance selection screen.

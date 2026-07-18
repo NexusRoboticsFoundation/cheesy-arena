@@ -37,6 +37,7 @@ const (
 	scheduledBreakDelaySec   = 5
 	earlyLateThresholdMin    = 2.5
 	MaxMatchGapMin           = 20
+	countdownDurationMs      = 3850
 )
 
 // Progression of match states.
@@ -74,6 +75,7 @@ type Arena struct {
 	MatchState
 	lastMatchState                    MatchState
 	CurrentMatch                      *model.Match
+	countdownStartTime                time.Time
 	MatchStartTime                    time.Time
 	LastMatchTimeSec                  float64
 	RedRealtimeScore                  *RealtimeScore
@@ -692,6 +694,21 @@ func (arena *Arena) Update() {
 		for _, allianceStation := range arena.AllianceStations {
 			allianceStation.GameData = ""
 		}
+		if arena.Plc.IsFtaReady() && arena.checkCanStartMatch() == nil {
+			if arena.countdownStartTime.IsZero() {
+				arena.countdownStartTime = time.Now()
+				arena.PlaySound(fmt.Sprintf("countdown_%d", rand.Intn(2)))
+			} else {
+				if time.Since(arena.countdownStartTime) > time.Millisecond*countdownDurationMs {
+					arena.StartMatch()
+				}
+			}
+		} else {
+			if !arena.countdownStartTime.IsZero() {
+				arena.StopSound()
+				arena.countdownStartTime = time.Time{}
+			}
+		}
 	case StartMatch:
 		arena.MatchStartTime = time.Now()
 		arena.LastMatchTimeSec = -1
@@ -1129,7 +1146,7 @@ func (arena *Arena) checkCanStartMatch() error {
 	if arena.FieldSafeToStart.IsZero() {
 		return fmt.Errorf("cannot start match until head ref marks field as safe")
 	} else {
-		if time.Since(arena.FieldSafeToStart) >= 500*time.Millisecond {
+		if time.Since(arena.FieldSafeToStart) >= 1*time.Second {
 			return fmt.Errorf("cannot start match until head ref marks field as safe again")
 		}
 	}
@@ -1245,9 +1262,6 @@ func (arena *Arena) handlePlcInputOutput() {
 	case PreMatch:
 		if arena.lastMatchState != PreMatch {
 			arena.Plc.SetFieldResetLight(true)
-		}
-		if arena.Plc.IsFtaReady() && arena.checkCanStartMatch() == nil {
-			arena.StartMatch()
 		}
 		fallthrough
 	case TimeoutActive:
@@ -1418,6 +1432,10 @@ func (arena *Arena) PlaySound(name string) {
 	if !arena.MuteMatchSounds {
 		arena.PlaySoundNotifier.NotifyWithMessage(name)
 	}
+}
+
+func (arena *Arena) StopSound() {
+	arena.PlaySoundNotifier.NotifyWithMessage("")
 }
 
 func (arena *Arena) positionPostMatchScoreReady(position string) bool {
