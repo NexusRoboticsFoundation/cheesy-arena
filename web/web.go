@@ -185,6 +185,8 @@ func (web *Web) newHandler() http.Handler {
 	mux.HandleFunc("GET /panels/referee", web.refereePanelHandler)
 	mux.HandleFunc("GET /panels/referee/foul_list", web.refereePanelFoulListHandler)
 	mux.HandleFunc("GET /panels/referee/websocket", web.refereePanelWebsocketHandler)
+	mux.HandleFunc("GET /panels/field_supervisor", web.fieldSupervisorPanelHandler)
+	mux.HandleFunc("GET /panels/field_supervisor/websocket", web.fieldSupervisorPanelWebsocketHandler)
 	mux.HandleFunc("GET /reports/csv/backups", web.backupTeamsCsvReportHandler)
 	mux.HandleFunc("GET /reports/csv/fta", web.ftaCsvReportHandler)
 	mux.HandleFunc("GET /reports/csv/rankings", web.rankingsCsvReportHandler)
