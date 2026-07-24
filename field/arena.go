@@ -1015,6 +1015,40 @@ func (arena *Arena) getNextMatch(excludeCurrent bool) (*model.Match, error) {
 	return nil, nil
 }
 
+// Returns the previous match of the same type that is currently loaded, or nil if there are no more matches.
+func (arena *Arena) GetPreviousMatch() (*model.Match, error) {
+	if arena.CurrentMatch.Type == model.Test {
+		return nil, nil
+	}
+
+	matches, err := arena.Database.GetMatchesByType(arena.CurrentMatch.Type, false)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the index of the current match in the matches slice
+	currentIndex := -1
+	for i, match := range matches {
+		if match.Id == arena.CurrentMatch.Id {
+			currentIndex = i
+			break
+		}
+	}
+
+	if currentIndex == -1 {
+		// Current match not found
+		return nil, nil
+	}
+
+	// If current match is the first in the list, there is no previous match.
+	if currentIndex == 0 {
+		return nil, nil
+	}
+
+	previous := matches[currentIndex-1]
+	return &previous, nil
+}
+
 // Configures the field network for the next match in advance of the current match being scored and committed.
 func (arena *Arena) preLoadNextMatch() {
 	if arena.MatchState != PostMatch {

@@ -8,6 +8,8 @@ let redFoulsHashCode = 0;
 let blueFoulsHashCode = 0;
 let scoreIsReady = false;
 let isPostMatch = false;
+let expectedStartTime;
+let twoMinuteWarningTime;
 
 // Sends the foul to the server to add it to the list.
 const addFoul = function (alliance, isMajor) {
@@ -102,6 +104,8 @@ var commitAndPost = function () {
 
 // Handles a websocket message to update the teams for the current match.
 var handleMatchLoad = function (data) {
+  expectedStartTime = new Date(data.ExpectedStartTime);
+
   $("#matchName").text(data.Match.LongName);
 
   setTeamCard("red", 1, data.Teams["R1"]);
@@ -130,6 +134,10 @@ const handleMatchTime = function (data) {
   }
 
   $("#teamTitle").text(title)
+
+  if(isPostMatch) {
+    twoMinuteWarningTime = undefined;
+  }
 };
 
 const towerStatusNames = [
@@ -204,7 +212,38 @@ const handleArenaStatus = function (data) {
   setTeamBypassedStatus("blue1", data.AllianceStations["B1"]?.Bypass);
   setTeamBypassedStatus("blue2", data.AllianceStations["B2"]?.Bypass);
   setTeamBypassedStatus("blue3", data.AllianceStations["B3"]?.Bypass);
+
+  if(expectedStartTime && matchStates[data.MatchState] === "PRE_MATCH") {
+    const diff = Math.floor((expectedStartTime - new Date()) / 1000);
+    const prefix = diff < 0 ? "-" : "";
+    const seconds = Math.abs(diff % 60);
+    const minutes = Math.floor(Math.abs(diff) / 60);
+    let display = minutes > 1000 ? '' : `${prefix}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+    if(twoMinuteWarningTime) {
+      const warningDiff = Math.floor((twoMinuteWarningTime - new Date()) / 1000);
+      const warningPrefix = warningDiff < 0 ? "-" : "";
+      const warningSeconds = Math.abs(warningDiff % 60);
+      const warningMinutes = Math.floor(Math.abs(warningDiff) / 60);
+      display += ` (warning active: ${warningPrefix}${warningMinutes}:${warningSeconds < 10 ? '0' : ''}${warningSeconds})`;
+    }
+
+    $("#matchTimer").text(display);
+
+    if(diff < 0 && !twoMinuteWarningTime) {
+      $("#twoMinuteWarningButton").show();
+    } else {
+      $("#twoMinuteWarningButton").hide();
+    }
+  } else {
+    $("#twoMinuteWarningButton").hide();
+    $("#matchTimer").text('');
+  }
 };
+
+const startTwoMinuteWarning = function() {
+  twoMinuteWarningTime = new Date(Date.now() + (2 * 60 * 1000));
+}
 
 const setTeamBypassedStatus = function (station, bypassed) {
   const cardButton = $(`#${station}Card`);
