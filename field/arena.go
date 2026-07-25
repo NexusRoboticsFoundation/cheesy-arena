@@ -1327,10 +1327,10 @@ func (arena *Arena) handlePlcInputOutput() {
 	// Handle the evergreen PLC functions: stack lights, stack buzzer, and field reset light.
 	switch arena.MatchState {
 	case PreMatch:
-		if arena.lastMatchState != PreMatch {
-			arena.Plc.SetFieldResetLight(true)
-			arena.Leds.SetMode(led.GreenMode, led.GreenMode)
-		}
+		// if arena.lastMatchState != PreMatch {
+		// 		arena.Plc.SetFieldResetLight(true)
+		// 		arena.Leds.SetMode(led.GreenMode, led.GreenMode)
+		// }
 		fallthrough
 	case TimeoutActive:
 		fallthrough
@@ -1352,9 +1352,6 @@ func (arena *Arena) handlePlcInputOutput() {
 			}
 		}
 	case PostMatch:
-		if arena.FieldReset {
-			arena.Plc.SetFieldResetLight(true)
-		}
 		scoreReady := arena.RedRealtimeScore.FoulsCommitted && arena.BlueRealtimeScore.FoulsCommitted &&
 			arena.positionPostMatchScoreReady("red") && arena.positionPostMatchScoreReady("blue")
 		arena.Plc.SetStackLights(false, false, !scoreReady, false)
@@ -1464,6 +1461,7 @@ func (arena *Arena) SignalVolunteers() {
 	arena.FieldReset = false
 	arena.AllianceStationDisplayMode = "signalCount"
 	arena.AllianceStationDisplayModeNotifier.Notify()
+	arena.Plc.SetFieldResetLight(false)
 	arena.Leds.SetMode(led.PurpleMode, led.PurpleMode)
 }
 
@@ -1481,6 +1479,7 @@ func (arena *Arena) SignalReset() {
 	arena.FieldReset = true
 	arena.AllianceStationDisplayMode = "fieldReset"
 	arena.AllianceStationDisplayModeNotifier.Notify()
+	arena.Plc.SetFieldResetLight(true)
 	arena.Leds.SetMode(led.GreenMode, led.GreenMode)
 }
 
