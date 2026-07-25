@@ -223,6 +223,10 @@ func (zone *zone) updateRainbowMode(counter int) {
 		side := i/pixelsPerFixture + 1
 		pixel := i % pixelsPerFixture
 
+		if side == 2 || side == 4 {
+			pixel = pixelsPerFixture - 1 - pixel
+		}
+
 		for fixture := 0; fixture < fixturesPerSide; fixture++ {
 			start := ((side-1)*fixturesPerSide + fixture) * pixelsPerFixture
 			zone.pixels[start+pixel] = color
