@@ -8,7 +8,26 @@ let blueSide;
 const lowBatteryThreshold = 8;
 const highBtuThreshold = 7.0;
 const minBatteryTracker = {};
+const disconnectTracker = { radio: {}, rio: {} };
 let previousMatchStateText = null;
+
+function formatDisconnectTimer(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  if (totalSeconds < 60) return totalSeconds + "s";
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return mins + "m " + secs + "s";
+}
+
+function getDisconnectText(type, station, inMatch, baseText) {
+  if (inMatch) {
+    if (!disconnectTracker[type][station]) disconnectTracker[type][station] = Date.now();
+    return baseText + " (" + formatDisconnectTimer(Date.now() - disconnectTracker[type][station]) + ")";
+  } else {
+    disconnectTracker[type][station] = null;
+    return baseText;
+  }
+}
 
 const handleArenaStatus = function (data) {
   if (currentMatchId == null) {
@@ -16,6 +35,9 @@ const handleArenaStatus = function (data) {
   } else if (currentMatchId !== data.MatchId) {
     location.reload();
   }
+
+  const matchStateText = $("#matchState").text();
+  const inMatch = (matchStateText === "AUTONOMOUS" || matchStateText === "TELEOPERATED" || matchStateText === "PAUSE");
 
   $.each(data.AllianceStations, function (station, stationStatus) {
     let teamElementPrefix;
@@ -102,9 +124,10 @@ const handleArenaStatus = function (data) {
 
       if (wifiStatus.TeamId !== expectedTeamId && wifiStatus.TeamId !== 0) {
         teamRadioElement.attr("data-status-ok", false);
-        teamRadioText.text("x RADIO");
+        teamRadioText.text(getDisconnectText("radio", station, inMatch, "x RADIO"));
         teamRadioIconElement.attr("class", "bi bi-wifi-off");
       } else if (radioAssociated && radioPingable) {
+        disconnectTracker.radio[station] = null;
         teamRadioElement.attr("data-status-ok", true);
         teamRadioText.text("RADIO");
         
@@ -115,10 +138,10 @@ const handleArenaStatus = function (data) {
         teamRadioIconElement.attr("class", "bi " + radioIcon);
       } else if (radioAssociated && !radioPingable) {
         teamRadioElement.attr("data-status-warning", true);
-        teamRadioText.text("⚠ RADIO");
+        teamRadioText.text(getDisconnectText("radio", station, inMatch, "⚠ RADIO"));
         teamRadioIconElement.attr("class", "bi bi-laptop");
       } else {
-        teamRadioText.text("x RADIO");
+        teamRadioText.text(getDisconnectText("radio", station, inMatch, "x RADIO"));
         teamRadioIconElement.attr("class", "bi bi-wifi-off");
       }
 
@@ -127,16 +150,17 @@ const handleArenaStatus = function (data) {
       teamRioElement.removeAttr("data-status-warning");
 
       if (dsConn.RobotLinked) {
+        disconnectTracker.rio[station] = null;
         teamRioElement.attr("data-status-ok", true);
         teamRioText.text("RIO");
         teamRioIconElement.attr("class", "bi bi-cpu");
       } else if (dsConn.RioLinked) {
         teamRioElement.attr("data-status-warning", true);
-        teamRioText.text("⚠ RIO");
+        teamRioText.text(getDisconnectText("rio", station, inMatch, "⚠ RIO"));
         teamRioIconElement.attr("class", "bi bi-cpu-fill");
       } else {
         teamRioElement.attr("data-status-ok", false);
-        teamRioText.text("x RIO");
+        teamRioText.text(getDisconnectText("rio", station, inMatch, "x RIO"));
         teamRioIconElement.attr("class", "bi bi-cpu");
       }
 
@@ -222,28 +246,26 @@ const handleArenaStatus = function (data) {
       const expectedTeamId = stationStatus.Team ? stationStatus.Team.Id : 0;
       if (wifiStatus.TeamId !== expectedTeamId && wifiStatus.TeamId !== 0) {
         teamRadioElement.attr("data-status-ok", false);
-        teamRadioText.text("x RADIO");
+        teamRadioText.text(getDisconnectText("radio", station, inMatch, "x RADIO"));
         teamRadioIconElement.attr("class", "bi bi-wifi-off");
       } else if (wifiStatus.TeamId === expectedTeamId && wifiStatus.RadioLinked) {
         teamRadioElement.attr("data-status-warning", true);
-        teamRadioText.text("⚠ RADIO");
+        teamRadioText.text(getDisconnectText("radio", station, inMatch, "⚠ RADIO"));
         teamRadioIconElement.attr("class", "bi bi-laptop");
       } else {
-        teamRadioText.text("x RADIO");
+        teamRadioText.text(getDisconnectText("radio", station, inMatch, "x RADIO"));
         teamRadioIconElement.attr("class", "bi bi-wifi-off");
       }
 
       teamRioElement.removeAttr("data-status-ok");
       teamRioElement.removeAttr("data-status-warning");
       teamRioElement.attr("data-status-ok", false);
-      teamRioText.text("x RIO");
+      teamRioText.text(getDisconnectText("rio", station, inMatch, "x RIO"));
       teamRioIconElement.attr("class", "bi bi-cpu");
     }
 
     // Robot state (E-Stop, Bypass, etc.)
     const teamElement = $(teamElementPrefix);
-    const matchStateText = $("#matchState").text();
-    const inMatch = (matchStateText === "AUTONOMOUS" || matchStateText === "TELEOPERATED" || matchStateText === "PAUSE");
     
     teamRobotElement.removeAttr("data-status-ok");
     
