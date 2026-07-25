@@ -402,7 +402,7 @@ func (arena *Arena) LoadMatch(match *model.Match) error {
 	arena.Plc.ResetMatch()
 	arena.NextFoulId = 1
 	arena.redWonAuto = false
-	arena.Leds.SetMode(led.OffMode, led.OffMode)
+	// arena.Leds.SetMode(led.OffMode, led.OffMode)
 
 	// Notify any listeners about the new match.
 	arena.MatchLoadNotifier.Notify()
