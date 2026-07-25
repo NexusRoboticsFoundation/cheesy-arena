@@ -70,12 +70,17 @@ const handleArenaStatus = function (data) {
       const dsConn = stationStatus.DsConn;
       
       // DS Box
-      teamDsElement.attr("data-status-ok", dsConn.DsLinked);
+      teamDsElement.removeAttr("data-status-ok");
+      teamDsElement.removeAttr("data-status-warning");
       if (dsConn.DsLinked) {
+        teamDsElement.attr("data-status-ok", true);
         teamDsText.text("DS");
       } else if (dsConn.WrongStation) {
         teamDsElement.attr("data-status-warning", true);
         teamDsText.text("x WRONG DS");
+      } else if (stationStatus.Ethernet) {
+        teamDsElement.attr("data-status-warning", true);
+        teamDsText.text("⚠ DS");
       } else {
         teamDsText.text("x DS");
       }
@@ -128,9 +133,14 @@ const handleArenaStatus = function (data) {
       teamTripTimeElement.parent().removeAttr("data-status-ok");
       teamMissedPacketsElement.parent().removeAttr("data-status-ok");
     } else {
-      teamDsElement.attr("data-status-ok", "");
+      teamDsElement.removeAttr("data-status-ok");
       teamDsElement.removeAttr("data-status-warning");
-      teamDsText.text("x DS");
+      if (stationStatus.Ethernet) {
+        teamDsElement.attr("data-status-warning", true);
+        teamDsText.text("⚠ DS");
+      } else {
+        teamDsText.text("x DS");
+      }
 
       teamRioElement.attr("data-status-ok", "");
       teamRioText.text("x RIO");

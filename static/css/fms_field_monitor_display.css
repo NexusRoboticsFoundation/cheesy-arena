@@ -261,6 +261,11 @@ body {
   background-color: #4caf50;
 }
 
+.fms-status-block[data-status-warning="true"] {
+  background-color: #fdd835;
+  color: #000;
+}
+
 /* Stats Footer */
 .fms-team-stats {
   display: flex;
