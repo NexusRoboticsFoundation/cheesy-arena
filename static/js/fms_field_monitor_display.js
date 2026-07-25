@@ -36,6 +36,7 @@ const handleArenaStatus = function (data) {
     const teamRadioText = teamRadioElement.find(".fms-status-text");
     const teamRioElement = $(teamElementPrefix + "Rio");
     const teamRioText = teamRioElement.find(".fms-status-text");
+    const teamRioIconElement = teamRioElement.find("i");
     const teamRobotElement = $(teamElementPrefix + "Robot");
 
     const teamStatsElement = $(teamElementPrefix + "Stats");
@@ -122,12 +123,21 @@ const handleArenaStatus = function (data) {
       }
 
       // RIO Box
-      const rioOkay = dsConn.RobotLinked;
-      teamRioElement.attr("data-status-ok", rioOkay);
-      if (rioOkay) {
+      teamRioElement.removeAttr("data-status-ok");
+      teamRioElement.removeAttr("data-status-warning");
+
+      if (dsConn.RobotLinked) {
+        teamRioElement.attr("data-status-ok", true);
         teamRioText.text("RIO");
+        teamRioIconElement.attr("class", "bi bi-cpu");
+      } else if (dsConn.RioLinked) {
+        teamRioElement.attr("data-status-warning", true);
+        teamRioText.text("⚠ RIO");
+        teamRioIconElement.attr("class", "bi bi-cpu-fill");
       } else {
+        teamRioElement.attr("data-status-ok", false);
         teamRioText.text("x RIO");
+        teamRioIconElement.attr("class", "bi bi-cpu");
       }
 
       // Stats
@@ -222,6 +232,12 @@ const handleArenaStatus = function (data) {
         teamRadioText.text("x RADIO");
         teamRadioIconElement.attr("class", "bi bi-wifi-off");
       }
+
+      teamRioElement.removeAttr("data-status-ok");
+      teamRioElement.removeAttr("data-status-warning");
+      teamRioElement.attr("data-status-ok", false);
+      teamRioText.text("x RIO");
+      teamRioIconElement.attr("class", "bi bi-cpu");
     }
 
     // Robot state (E-Stop, Bypass, etc.)
