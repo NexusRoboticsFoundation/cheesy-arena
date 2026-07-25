@@ -223,7 +223,10 @@ func (zone *zone) updateRainbowMode(counter int) {
 		side := i/pixelsPerFixture + 1
 		pixel := i % pixelsPerFixture
 
-		if side == 2 || side == 4 {
+		// Since sides 2 and 4 are physically upside down, their data flows Right-to-Left natively.
+		// To make a continuous counter-clockwise ring, we need all sides to flow Right-to-Left.
+		// Therefore, we must reverse the pixel mapping for the standard sides (1 and 3) so they match.
+		if side == 1 || side == 3 {
 			pixel = pixelsPerFixture - 1 - pixel
 		}
 
