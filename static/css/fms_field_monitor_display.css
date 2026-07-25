@@ -100,8 +100,8 @@ body {
   border: 3px solid #1976d2; /* Blue */
 }
 
-/* On very small screens, make it a single column. */
-@media (max-width: 800px) {
+/* On very small screens or vertical screens, make it a single column and scale up fonts. */
+@media (max-width: 800px), (orientation: portrait) {
   .fms-row {
     flex-direction: column;
     overflow-y: auto;
@@ -110,6 +110,22 @@ body {
     width: 100%;
     margin-bottom: 1vw;
   }
+  
+  .fms-team-id { font-size: 4vw; width: 13vw; margin-right: 2vw; }
+  .fms-station-badge { font-size: 1.6vw; padding: 0.4vw 1vw; margin-right: 1vw; }
+  .fms-new-key-badge { font-size: 1.6vw; padding: 0.4vw 1vw; }
+  .fms-status-pill { font-size: 1.6vw; padding: 0.4vw 1vw; }
+  .fms-status-block { padding: 0.6vw 4vw; }
+  .fms-status-block i { font-size: 4vw; margin-bottom: 0.2vw; }
+  .fms-status-text { font-size: 1.6vw; }
+  .fms-stat-value { font-size: 2vw; margin-bottom: 0.2vw; }
+  .fms-stat-label { font-size: 1.2vw; }
+  .fms-stat-sub { font-size: 1.2vw; }
+  .fms-team-notes { font-size: 1.6vw; }
+  
+  #matchStatusRow { font-size: 2vw; }
+  #eventStatusRow { font-size: 2.4vw; }
+  .left-score, .right-score { font-size: 2.0vw; }
 }
 
 .fms-team {
@@ -163,12 +179,6 @@ body {
   background-color: #1976d2;
 }
 
-.station-text-left[data-reversed="true"]::before {
-  content: "STATION ";
-}
-.station-text-right[data-reversed="true"]::before {
-  content: "STATION ";
-}
 
 .fms-new-key-badge {
   background-color: #666;
