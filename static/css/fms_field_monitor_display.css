@@ -231,8 +231,7 @@ body {
 
 /* Add some classes to modify the icon color if things are okay */
 .fms-status-block[data-status-ok="true"] {
-  /* FMS seems to keep boxes dark grey but maybe changes icon color? */
-  /* If we follow the screenshot, disconnected says "x DS", connected might be green icon without "x" */
+  background-color: #4caf50;
 }
 
 /* Stats Footer */
