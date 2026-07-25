@@ -189,13 +189,15 @@ func (zone *zone) sweepFixture(start, counter int, direction fillDirection) {
 
 // updateRainbowMode renders a rotating rainbow pattern counter-clockwise.
 func (zone *zone) updateRainbowMode(counter int) {
-	for i := 0; i < numPixels; i++ {
-		pos := (i - (counter / 2)) % numPixels
+	logicalPixels := numSides * pixelsPerFixture
+
+	for i := 0; i < logicalPixels; i++ {
+		pos := (i - (counter / 2)) % logicalPixels
 		if pos < 0 {
-			pos += numPixels
+			pos += logicalPixels
 		}
 
-		h := float64(pos) / float64(numPixels) * 6
+		h := float64(pos) / float64(logicalPixels) * 6
 		idx := int(h)
 		f := h - float64(idx)
 
@@ -218,16 +220,17 @@ func (zone *zone) updateRainbowMode(counter int) {
 			color = Color{255, 0, q}
 		}
 
-		side := (i / (fixturesPerSide * pixelsPerFixture)) + 1
-		fixture := (i / pixelsPerFixture) % fixturesPerSide
+		side := i/pixelsPerFixture + 1
 		pixel := i % pixelsPerFixture
 
 		if side == 2 || side == 4 {
 			pixel = pixelsPerFixture - 1 - pixel
 		}
 
-		start := ((side-1)*fixturesPerSide + fixture) * pixelsPerFixture
-		zone.pixels[start+pixel] = color
+		for fixture := 0; fixture < fixturesPerSide; fixture++ {
+			start := ((side-1)*fixturesPerSide + fixture) * pixelsPerFixture
+			zone.pixels[start+pixel] = color
+		}
 	}
 }
 
