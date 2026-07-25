@@ -7,6 +7,8 @@ let redSide;
 let blueSide;
 const lowBatteryThreshold = 8;
 const highBtuThreshold = 7.0;
+const minBatteryTracker = {};
+let previousMatchStateText = null;
 
 const handleArenaStatus = function (data) {
   if (currentMatchId == null) {
@@ -107,7 +109,22 @@ const handleArenaStatus = function (data) {
       // Stats
       teamStatsElement.removeAttr("data-status-ok");
       
-      teamBatteryElement.html(dsConn.BatteryVoltage.toFixed(1) + 'V <span class="fms-stat-sub">Min 0.0</span>');
+      const matchStateText = $("#matchState").text();
+      let minBat = minBatteryTracker[stationId] || 99.9;
+      
+      if (dsConn.RobotLinked && dsConn.BatteryVoltage > 0) {
+        if (dsConn.BatteryVoltage < minBat) {
+          minBat = dsConn.BatteryVoltage;
+          minBatteryTracker[stationId] = minBat;
+        }
+      } else if (!dsConn.RobotLinked && matchStateText === "PRE-MATCH") {
+        minBatteryTracker[stationId] = null;
+        minBat = 0.0;
+      }
+      
+      let minBatText = (minBat === 99.9 || minBat === 0.0) ? "0.0" : minBat.toFixed(1);
+
+      teamBatteryElement.html(dsConn.BatteryVoltage.toFixed(1) + 'V <span class="fms-stat-sub">Min ' + minBatText + '</span>');
       if (dsConn.RobotLinked && dsConn.BatteryVoltage < lowBatteryThreshold) {
         teamBatteryElement.parent().attr("data-status-ok", false);
       } else {
@@ -147,7 +164,14 @@ const handleArenaStatus = function (data) {
       
       teamStatsElement.removeAttr("data-status-ok");
       
-      teamBatteryElement.html('0.0V <span class="fms-stat-sub">Min 0.0</span>');
+      const matchStateText = $("#matchState").text();
+      if (matchStateText === "PRE-MATCH") {
+        minBatteryTracker[stationId] = null;
+      }
+      let minBat = minBatteryTracker[stationId];
+      let minBatText = minBat ? minBat.toFixed(1) : "0.0";
+      
+      teamBatteryElement.html('0.0V <span class="fms-stat-sub">Min ' + minBatText + '</span>');
       teamBatteryElement.parent().removeAttr("data-status-ok");
       
       teamBandwidthElement.text("0.000 Mbps");
@@ -239,6 +263,13 @@ const handleArenaStatus = function (data) {
 
 const handleMatchTime = function (data) {
   translateMatchTime(data, function (matchState, matchStateText, countdownSec) {
+    if (previousMatchStateText === "PRE-MATCH" && matchStateText === "AUTONOMOUS") {
+      for (const stationId in minBatteryTracker) {
+        minBatteryTracker[stationId] = null;
+      }
+    }
+    previousMatchStateText = matchStateText;
+    
     $("#matchState").text(matchStateText);
     $("#matchTime").text(countdownSec);
     if (matchStateText === "PRE-MATCH" || matchStateText === "POST-MATCH") {
