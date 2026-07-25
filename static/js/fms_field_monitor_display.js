@@ -108,16 +108,14 @@ const handleArenaStatus = function (data) {
         teamRadioText.text("RADIO");
         
         let radioIcon = "bi-reception-4";
-        if (wifiStatus.RadioLinked && wifiStatus.ConnectionQuality > 0) {
-          if (wifiStatus.ConnectionQuality <= 25) radioIcon = "bi-reception-1";
-          else if (wifiStatus.ConnectionQuality <= 50) radioIcon = "bi-reception-2";
-          else if (wifiStatus.ConnectionQuality <= 75) radioIcon = "bi-reception-3";
+        if (wifiStatus.RadioLinked) {
+          radioIcon = "bi-reception-" + (wifiStatus.ConnectionQuality > 0 ? wifiStatus.ConnectionQuality : 1);
         }
         teamRadioIconElement.attr("class", "bi " + radioIcon);
       } else if (radioAssociated && !radioPingable) {
         teamRadioElement.attr("data-status-warning", true);
         teamRadioText.text("⚠ RADIO");
-        teamRadioIconElement.attr("class", "bi bi-pc-display");
+        teamRadioIconElement.attr("class", "bi bi-laptop");
       } else {
         teamRadioText.text("x RADIO");
         teamRadioIconElement.attr("class", "bi bi-wifi-off");
@@ -219,7 +217,7 @@ const handleArenaStatus = function (data) {
       } else if (wifiStatus.TeamId === expectedTeamId && wifiStatus.RadioLinked) {
         teamRadioElement.attr("data-status-warning", true);
         teamRadioText.text("⚠ RADIO");
-        teamRadioIconElement.attr("class", "bi bi-pc-display");
+        teamRadioIconElement.attr("class", "bi bi-laptop");
       } else {
         teamRadioText.text("x RADIO");
         teamRadioIconElement.attr("class", "bi bi-wifi-off");
