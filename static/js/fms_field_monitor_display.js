@@ -100,21 +100,33 @@ const handleArenaStatus = function (data) {
       }
 
       // Stats
-      const batteryOkay = dsConn.BatteryVoltage > lowBatteryThreshold && dsConn.RobotLinked;
-      teamBatteryElement.html(dsConn.BatteryVoltage.toFixed(1) + 'V <span class="fms-stat-sub">Min 0.0</span>');
-
-      const btuOkay = wifiStatus.MBits < highBtuThreshold && dsConn.RobotLinked;
-      teamStatsElement.attr("data-status-ok", btuOkay);
+      teamStatsElement.removeAttr("data-status-ok");
       
+      teamBatteryElement.html(dsConn.BatteryVoltage.toFixed(1) + 'V <span class="fms-stat-sub">Min 0.0</span>');
+      if (dsConn.RobotLinked && dsConn.BatteryVoltage < lowBatteryThreshold) {
+        teamBatteryElement.parent().attr("data-status-ok", false);
+      } else {
+        teamBatteryElement.parent().removeAttr("data-status-ok");
+      }
+
       if (wifiStatus.MBits >= 0.01) {
         teamBandwidthElement.text(wifiStatus.MBits.toFixed(3) + " Mbps");
+        if (dsConn.RobotLinked && wifiStatus.MBits >= highBtuThreshold) {
+          teamBandwidthElement.parent().attr("data-status-ok", false);
+        } else {
+          teamBandwidthElement.parent().removeAttr("data-status-ok");
+        }
         teamTripTimeElement.text(dsConn.DsRobotTripTimeMs + " ms");
         teamMissedPacketsElement.text(dsConn.MissedPacketCount);
       } else {
         teamBandwidthElement.text("0.000 Mbps");
+        teamBandwidthElement.parent().removeAttr("data-status-ok");
         teamTripTimeElement.text("0 ms");
         teamMissedPacketsElement.text("0");
       }
+      
+      teamTripTimeElement.parent().removeAttr("data-status-ok");
+      teamMissedPacketsElement.parent().removeAttr("data-status-ok");
     } else {
       teamDsElement.attr("data-status-ok", "");
       teamDsElement.removeAttr("data-status-warning");
@@ -123,10 +135,19 @@ const handleArenaStatus = function (data) {
       teamRioElement.attr("data-status-ok", "");
       teamRioText.text("x RIO");
       
+      teamStatsElement.removeAttr("data-status-ok");
+      
       teamBatteryElement.html('0.0V <span class="fms-stat-sub">Min 0.0</span>');
+      teamBatteryElement.parent().removeAttr("data-status-ok");
+      
       teamBandwidthElement.text("0.000 Mbps");
+      teamBandwidthElement.parent().removeAttr("data-status-ok");
+      
       teamTripTimeElement.text("0 ms");
+      teamTripTimeElement.parent().removeAttr("data-status-ok");
+      
       teamMissedPacketsElement.text("0");
+      teamMissedPacketsElement.parent().removeAttr("data-status-ok");
 
       const expectedTeamId = stationStatus.Team ? stationStatus.Team.Id : 0;
       if (wifiStatus.TeamId === expectedTeamId) {
