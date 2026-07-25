@@ -20,6 +20,14 @@ func TestFieldMonitorDisplay(t *testing.T) {
 	assert.Contains(t, recorder.Body.String(), "Field Monitor - Untitled Event - Cheesy Arena")
 }
 
+func TestFmsFieldMonitorDisplay(t *testing.T) {
+	web := setupTestWeb(t)
+
+	recorder := web.getHttpResponse("/displays/fms_field_monitor?displayId=1&ds=false&fta=true&reversed=false")
+	assert.Equal(t, 200, recorder.Code)
+	assert.Contains(t, recorder.Body.String(), "Field Monitor - Untitled Event - Cheesy Arena")
+}
+
 func TestFieldMonitorDisplayWebsocket(t *testing.T) {
 	web := setupTestWeb(t)
 	web.arena.Database.CreateTeam(&model.Team{Id: 254})

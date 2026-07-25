@@ -39,6 +39,31 @@ func (web *Web) fieldMonitorDisplayHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// Renders the FMS-style field monitor display.
+func (web *Web) fmsFieldMonitorDisplayHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Get("fta") == "true" && !web.userIsAdmin(w, r) {
+		return
+	}
+
+	if !web.enforceDisplayConfiguration(w, r, map[string]string{"ds": "false", "fta": "false", "reversed": "false"}) {
+		return
+	}
+
+	template, err := web.parseFiles("templates/fms_field_monitor_display.html")
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+	data := struct {
+		*model.EventSettings
+	}{web.arena.EventSettings}
+	err = template.ExecuteTemplate(w, "fms_field_monitor_display.html", data)
+	if err != nil {
+		handleWebErr(w, err)
+		return
+	}
+}
+
 // The websocket endpoint for the field monitor display client to receive status updates.
 func (web *Web) fieldMonitorDisplayWebsocketHandler(w http.ResponseWriter, r *http.Request) {
 	isFta := r.URL.Query().Get("fta") == "true"
