@@ -187,13 +187,11 @@ const handleMatchTime = function (data) {
 };
 
 const handleRealtimeScore = function (data, reversed) {
-  if (reversed === "true") {
-    $("#rightScore").text(data.Red.ScoreSummary.Score);
-    $("#leftScore").text(data.Blue.ScoreSummary.Score);
-  } else {
-    $("#rightScore").text(data.Blue.ScoreSummary.Score);
-    $("#leftScore").text(data.Red.ScoreSummary.Score);
-  }
+  const leftScore = reversed ? data.Blue.ScoreSummary.Score : data.Red.ScoreSummary.Score;
+  const rightScore = reversed ? data.Red.ScoreSummary.Score : data.Blue.ScoreSummary.Score;
+  
+  $("#leftScore").text(leftScore);
+  $("#rightScore").text(rightScore);
 };
 
 const handleMatchLoad = function (data) {

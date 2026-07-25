@@ -20,7 +20,7 @@ body {
   justify-content: center;
 }
 #matchStatusRow {
-  height: 4%;
+  flex: 0 0 4%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -35,7 +35,7 @@ body {
   display: none;
 }
 #eventStatusRow {
-  height: 5%;
+  flex: 0 0 5%;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
@@ -46,9 +46,11 @@ body {
   color: #333;
 }
 
-.left-score[data-fta="false"], .right-score[data-fta="false"] {
-  display: none;
+
+.left-score, .right-score {
+  font-size: 1.0vw;
 }
+
 .left-score[data-reversed=false], .right-score[data-reversed=true] {
   color: #d32f2f;
 }
@@ -66,6 +68,7 @@ body {
 
 .fms-row {
   flex-grow: 1;
+  min-height: 0;
   display: flex;
   width: 100%;
   padding: 0 0.5vw 0.5vw 0.5vw;
@@ -123,8 +126,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 15%;
-  min-height: 2em;
+  flex: 0 0 auto;
+  min-height: 2vw;
 }
 
 .fms-team-header-left {
@@ -203,7 +206,7 @@ body {
 .fms-team-status {
   display: flex;
   justify-content: space-between;
-  height: 55%;
+  flex: 1 1 0;
   margin-top: 0.5vw;
   margin-bottom: 0.5vw;
 }
@@ -238,7 +241,7 @@ body {
 .fms-team-stats {
   display: flex;
   justify-content: space-between;
-  height: 20%;
+  flex: 0 0 auto;
   align-items: flex-end;
   padding-bottom: 0.2vw;
 }
@@ -269,8 +272,8 @@ body {
 }
 
 .fms-team-notes[data-fta="true"] {
-  height: 10%;
-  min-height: 1.5em;
+  flex: 0 0 auto;
+  min-height: 2vw;
   display: flex;
   justify-content: flex-start;
   padding: 0.2vw 0.5vw;
