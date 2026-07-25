@@ -88,29 +88,34 @@ func (arena *Arena) generateAllianceStationDisplayModeMessage() any {
 }
 
 func (arena *Arena) generateArenaStatusMessage() any {
+	startMatchConditions := arena.getStartMatchConditions()
 	return &struct {
 		MatchId          int
 		AllianceStations map[string]*AllianceStation
 		MatchState
 		CanStartMatch         bool
+		StartMatchConditions  []string
 		AccessPointStatus     string
 		SwitchStatus          string
 		RedSCCStatus          string
 		BlueSCCStatus         string
 		PlcIsHealthy          bool
 		FieldEStop            bool
+		IsFtaReady            bool
 		PlcArmorBlockStatuses map[string]bool
 	}{
 		arena.CurrentMatch.Id,
 		arena.AllianceStations,
 		arena.MatchState,
-		arena.checkCanStartMatch() == nil,
+		len(startMatchConditions) == 0,
+		startMatchConditions,
 		arena.accessPoint.Status,
 		arena.networkSwitch.Status,
 		arena.redSCC.Status,
 		arena.blueSCC.Status,
 		arena.Plc.IsHealthy(),
 		arena.Plc.GetFieldEStop(),
+		arena.Plc.IsFtaReady(),
 		arena.Plc.GetArmorBlockStatuses(),
 	}
 }
