@@ -85,6 +85,7 @@ body {
   border-radius: 5px;
   background-color: #fff;
   margin: 0.25vw;
+  min-height: 0;
 }
 
 /* Colored borders for the columns */
@@ -108,15 +109,16 @@ body {
 }
 
 .fms-team {
-  flex: 1;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   background-color: #fff;
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  margin-bottom: 0.5vw;
-  padding: 0.5vw;
+  margin-bottom: 0.3vw;
+  padding: 0.3vw;
   box-sizing: border-box;
+  min-height: 0;
 }
 .fms-team:last-child {
   margin-bottom: 0;
@@ -126,8 +128,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex: 0 0 auto;
-  min-height: 2vw;
+  flex: 15 15 0;
+  min-height: 0;
 }
 
 .fms-team-header-left {
@@ -206,9 +208,10 @@ body {
 .fms-team-status {
   display: flex;
   justify-content: space-between;
-  flex: 1 1 0;
-  margin-top: 0.5vw;
-  margin-bottom: 0.5vw;
+  flex: 50 50 0;
+  margin-top: 0.2vw;
+  margin-bottom: 0.2vw;
+  min-height: 0;
 }
 
 .fms-status-block {
@@ -220,11 +223,13 @@ body {
   align-items: center;
   justify-content: center;
   color: white;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .fms-status-block i {
   font-size: 2vw;
-  margin-bottom: 0.5vw;
+  margin-bottom: 0.1vw;
 }
 
 .fms-status-text {
@@ -241,7 +246,7 @@ body {
 .fms-team-stats {
   display: flex;
   justify-content: space-between;
-  flex: 0 0 auto;
+  flex: 20 20 0;
   align-items: flex-end;
   padding-bottom: 0.2vw;
 }
@@ -272,8 +277,8 @@ body {
 }
 
 .fms-team-notes[data-fta="true"] {
-  flex: 0 0 auto;
-  min-height: 2vw;
+  flex: 15 15 0;
+  min-height: 0;
   display: flex;
   justify-content: flex-start;
   padding: 0.2vw 0.5vw;
