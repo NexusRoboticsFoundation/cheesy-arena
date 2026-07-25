@@ -12,11 +12,8 @@ const disconnectTracker = { radio: {}, rio: {} };
 let previousMatchStateText = null;
 
 function formatDisconnectTimer(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  if (totalSeconds < 60) return totalSeconds + "s";
-  const mins = Math.floor(totalSeconds / 60);
-  const secs = totalSeconds % 60;
-  return mins + "m " + secs + "s";
+  const s = Math.floor(ms / 1000);
+  return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
 function getDisconnectText(type, station, inMatch, baseText) {
@@ -63,9 +60,13 @@ const handleArenaStatus = function (data) {
 
     const teamStatsElement = $(teamElementPrefix + "Stats");
     const teamBatteryElement = $(teamElementPrefix + "Battery");
+    const teamBatteryParent = teamBatteryElement.parent();
     const teamBandwidthElement = $(teamElementPrefix + "Bandwidth");
+    const teamBandwidthParent = teamBandwidthElement.parent();
     const teamTripTimeElement = $(teamElementPrefix + "TripTime");
+    const teamTripTimeParent = teamTripTimeElement.parent();
     const teamMissedPacketsElement = $(teamElementPrefix + "MissedPackets");
+    const teamMissedPacketsParent = teamMissedPacketsElement.parent();
 
     teamNotesTextElement.attr("data-station", station);
 
@@ -184,29 +185,29 @@ const handleArenaStatus = function (data) {
 
       teamBatteryElement.html(dsConn.BatteryVoltage.toFixed(1) + 'V <span class="fms-stat-sub">Min ' + minBatText + '</span>');
       if (dsConn.RobotLinked && dsConn.BatteryVoltage < lowBatteryThreshold) {
-        teamBatteryElement.parent().attr("data-status-ok", false);
+        teamBatteryParent.attr("data-status-ok", false);
       } else {
-        teamBatteryElement.parent().removeAttr("data-status-ok");
+        teamBatteryParent.removeAttr("data-status-ok");
       }
 
       if (wifiStatus.MBits >= 0.01) {
         teamBandwidthElement.text(wifiStatus.MBits.toFixed(3) + " Mbps");
         if (dsConn.RobotLinked && wifiStatus.MBits >= highBtuThreshold) {
-          teamBandwidthElement.parent().attr("data-status-ok", false);
+          teamBandwidthParent.attr("data-status-ok", false);
         } else {
-          teamBandwidthElement.parent().removeAttr("data-status-ok");
+          teamBandwidthParent.removeAttr("data-status-ok");
         }
         teamTripTimeElement.text(dsConn.DsRobotTripTimeMs + " ms");
         teamMissedPacketsElement.text(dsConn.MissedPacketCount);
       } else {
         teamBandwidthElement.text("0.000 Mbps");
-        teamBandwidthElement.parent().removeAttr("data-status-ok");
+        teamBandwidthParent.removeAttr("data-status-ok");
         teamTripTimeElement.text("0 ms");
         teamMissedPacketsElement.text("0");
       }
       
-      teamTripTimeElement.parent().removeAttr("data-status-ok");
-      teamMissedPacketsElement.parent().removeAttr("data-status-ok");
+      teamTripTimeParent.removeAttr("data-status-ok");
+      teamMissedPacketsParent.removeAttr("data-status-ok");
     } else {
       teamDsElement.removeAttr("data-status-ok");
       teamDsElement.removeAttr("data-status-warning");
@@ -230,16 +231,16 @@ const handleArenaStatus = function (data) {
       let minBatText = minBat ? minBat.toFixed(1) : "0.0";
       
       teamBatteryElement.html('0.0V <span class="fms-stat-sub">Min ' + minBatText + '</span>');
-      teamBatteryElement.parent().removeAttr("data-status-ok");
+      teamBatteryParent.removeAttr("data-status-ok");
       
       teamBandwidthElement.text("0.000 Mbps");
-      teamBandwidthElement.parent().removeAttr("data-status-ok");
+      teamBandwidthParent.removeAttr("data-status-ok");
       
       teamTripTimeElement.text("0 ms");
-      teamTripTimeElement.parent().removeAttr("data-status-ok");
+      teamTripTimeParent.removeAttr("data-status-ok");
       
       teamMissedPacketsElement.text("0");
-      teamMissedPacketsElement.parent().removeAttr("data-status-ok");
+      teamMissedPacketsParent.removeAttr("data-status-ok");
 
       teamRadioElement.removeAttr("data-status-ok");
       teamRadioElement.removeAttr("data-status-warning");

@@ -112,9 +112,8 @@ body {
   }
   
   .fms-team-id { font-size: 4vw; width: 13vw; margin-right: 2vw; }
-  .fms-station-badge { font-size: 1.6vw; padding: 0.4vw 1vw; margin-right: 1vw; }
-  .fms-new-key-badge { font-size: 1.6vw; padding: 0.4vw 1vw; }
-  .fms-status-pill { font-size: 1.6vw; padding: 0.4vw 1vw; }
+  .fms-station-badge, .fms-new-key-badge, .fms-status-pill { font-size: 1.6vw; padding: 0.4vw 1vw; }
+  .fms-station-badge { margin-right: 1vw; }
   .fms-status-block { padding: 0.6vw 4vw; }
   .fms-status-block i { font-size: 4vw; margin-bottom: 0.2vw; }
   .fms-status-text { font-size: 1.6vw; }
