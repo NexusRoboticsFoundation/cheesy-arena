@@ -264,6 +264,7 @@ body {
 /* Add some classes to modify the icon color if things are okay */
 .fms-status-block[data-status-ok="true"] {
   background-color: #4caf50;
+  color: #000;
 }
 
 .fms-status-block[data-status-warning="true"] {

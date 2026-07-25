@@ -41,10 +41,11 @@ Display showing robot connection status in the style of FMS Field Monitor.
         {{template "team" dict "side" "left" "position" "2" "station" "2"}}
         {{template "team" dict "side" "left" "position" "3" "station" "3"}}
       </div>
-      <div class="fms-column right-column reversible-right">
-        {{template "team" dict "side" "right" "position" "1" "station" "1"}}
-        {{template "team" dict "side" "right" "position" "2" "station" "2"}}
+      <!-- Right side (Red by default, Blue if reversed) -->
+      <div id="rightTeams" class="fms-column">
         {{template "team" dict "side" "right" "position" "3" "station" "3"}}
+        {{template "team" dict "side" "right" "position" "2" "station" "2"}}
+        {{template "team" dict "side" "right" "position" "1" "station" "1"}}
       </div>
     </div>
 
