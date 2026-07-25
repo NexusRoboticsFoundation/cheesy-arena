@@ -6,7 +6,11 @@ UI for entering and tracking fouls and red/yellow cards.
 */}}
 {{define "title"}}Referee Panel{{end}}
 {{define "body"}}
-<div id="matchName"></div>
+<div class="d-flex flex-row gap-3 align-items-center">
+  <div id="matchName" class="fw-bold"></div>
+  <div id="matchTimer"></div>
+  <button id="twoMinuteWarningButton" class="btn btn-warning" style="display: none;" onclick="startTwoMinuteWarning();">Start 2 minute warning</button>
+</div>
 <div id="refereePanel">
   <div id="cards" class="headRef-dependent">
     <h3 id="teamTitle">Red/Yellow Cards</h3>
