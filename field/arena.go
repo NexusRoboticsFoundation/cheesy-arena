@@ -7,13 +7,6 @@ package field
 
 import (
 	"fmt"
-	"github.com/Team254/cheesy-arena/game"
-	"github.com/Team254/cheesy-arena/led"
-	"github.com/Team254/cheesy-arena/model"
-	"github.com/Team254/cheesy-arena/network"
-	"github.com/Team254/cheesy-arena/partner"
-	"github.com/Team254/cheesy-arena/playoff"
-	"github.com/Team254/cheesy-arena/plc"
 	"log"
 	"math"
 	"math/rand"
@@ -23,6 +16,14 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Team254/cheesy-arena/game"
+	"github.com/Team254/cheesy-arena/led"
+	"github.com/Team254/cheesy-arena/model"
+	"github.com/Team254/cheesy-arena/network"
+	"github.com/Team254/cheesy-arena/partner"
+	"github.com/Team254/cheesy-arena/playoff"
+	"github.com/Team254/cheesy-arena/plc"
 )
 
 const (
@@ -85,6 +86,7 @@ type Arena struct {
 	EventStatus                       EventStatus
 	FieldVolunteers                   bool
 	FieldReset                        bool
+	FieldSafeToStart                  time.Time
 	AudienceDisplayMode               string
 	SavedMatch                        *model.Match
 	SavedMatchResult                  *model.MatchResult
@@ -538,6 +540,7 @@ func (arena *Arena) StartMatch() error {
 		arena.lastTeamLogTime = time.Time{}
 
 		arena.MatchState = StartMatch
+		arena.FieldSafeToStart = time.Time{}
 
 		if arena.EventSettings.NexusAutoQueueEnabled && arena.CurrentMatch.Type != model.Test {
 			go arena.NexusClient.MatchStarted(arena.CurrentMatch.LongName, arena.CurrentMatch.TypeOrder)
@@ -692,6 +695,9 @@ func (arena *Arena) Update() {
 		// Set all game data values to empty
 		for _, allianceStation := range arena.AllianceStations {
 			allianceStation.GameData = ""
+		}
+		if arena.Plc.IsFtaReady() && arena.checkCanStartMatch() == nil {
+			arena.StartMatch()
 		}
 	case StartMatch:
 		arena.MatchStartTime = time.Now()
@@ -1181,6 +1187,14 @@ func (arena *Arena) getStartMatchConditions() []string {
 				conditions,
 				fmt.Sprintf("PLC ArmorBlock %q is not connected", name),
 			)
+		}
+	}
+
+	if arena.FieldSafeToStart.IsZero() {
+		conditions = append(conditions, "HR ready switch is not active")
+	} else {
+		if time.Since(arena.FieldSafeToStart) >= 750*time.Millisecond {
+			conditions = append(conditions, "HR ready switch is expired")
 		}
 	}
 
