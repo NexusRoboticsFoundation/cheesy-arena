@@ -189,20 +189,39 @@ body {
   font-size: 0.9vw;
   font-weight: bold;
   text-align: center;
+  border: 1px solid transparent;
+  box-sizing: border-box;
 }
 
-/* Green pill */
-.fms-status-pill[data-status-ok="true"] {
+.fms-status-pill[data-robot-state="estop"] {
+  background-color: #2a2a2a;
+  color: white;
+}
+.fms-status-pill[data-robot-state="astop"],
+.fms-status-pill[data-robot-state="auto-disabled"],
+.fms-status-pill[data-robot-state="teleop-disabled"] {
+  background-color: #fdd835;
+  color: #000;
+}
+.fms-status-pill[data-robot-state="auto"],
+.fms-status-pill[data-robot-state="teleop"] {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #000;
+}
+.fms-status-pill[data-robot-state="bypassed"] {
+  background-color: #e0e0e0;
+  color: #000;
+  border: 1px solid #000;
+}
+.fms-status-pill[data-robot-state="not-ready"],
+.fms-status-pill[data-robot-state="no-team"] {
+  background-color: #2a2a2a;
+  color: white;
+}
+.fms-status-pill[data-robot-state="ready"] {
   background-color: #4caf50;
-}
-/* Red pill */
-.fms-status-pill[data-status-ok="false"] {
-  background-color: #d32f2f;
-}
-/* Yellow pill */
-.fms-status-pill[data-status-warning="true"] {
-  background-color: #ff9800;
-  color: #333;
+  color: white;
 }
 
 .fms-team-status {

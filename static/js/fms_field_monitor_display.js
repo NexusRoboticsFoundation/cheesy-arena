@@ -145,30 +145,62 @@ const handleArenaStatus = function (data) {
 
     // Robot state (E-Stop, Bypass, etc.)
     const teamElement = $(teamElementPrefix);
+    const matchStateText = $("#matchState").text();
+    const inMatch = (matchStateText === "AUTONOMOUS" || matchStateText === "TELEOPERATED" || matchStateText === "PAUSE");
+    
+    teamRobotElement.removeAttr("data-status-ok");
     
     if (stationStatus.EStop) {
       teamElement.attr("data-bypassed", "false");
-      teamRobotElement.attr("data-status-ok", false);
+      teamRobotElement.attr("data-robot-state", "estop");
       teamRobotElement.text("E-STOP");
     } else if (stationStatus.AStop) {
       teamElement.attr("data-bypassed", "false");
-      teamRobotElement.attr("data-status-ok", true);
+      teamRobotElement.attr("data-robot-state", "astop");
       teamRobotElement.text("A-STOP");
     } else if (stationStatus.Bypass) {
       teamElement.attr("data-bypassed", "true");
-      teamRobotElement.attr("data-status-ok", "");
+      teamRobotElement.attr("data-robot-state", "bypassed");
       teamRobotElement.text("BYPASSED");
     } else if (!stationStatus.Team) {
       teamElement.attr("data-bypassed", "false");
-      teamRobotElement.attr("data-status-ok", "");
+      teamRobotElement.attr("data-robot-state", "no-team");
       teamRobotElement.text("NO TEAM");
-    } else if (stationStatus.DsConn && !stationStatus.DsConn.DsLinked) {
+    } else if (inMatch) {
       teamElement.attr("data-bypassed", "false");
-      teamRobotElement.attr("data-status-ok", "");
+      const ds = stationStatus.DsConn;
+      
+      let isAuto = false;
+      let isEnabled = false;
+
+      if (ds) {
+        isAuto = ds.Auto;
+        isEnabled = ds.Enabled;
+      } else {
+        isAuto = (matchStateText === "AUTONOMOUS");
+        isEnabled = false;
+      }
+
+      if (isAuto && isEnabled) {
+        teamRobotElement.attr("data-robot-state", "auto");
+        teamRobotElement.text("AUTO");
+      } else if (isAuto && !isEnabled) {
+        teamRobotElement.attr("data-robot-state", "auto-disabled");
+        teamRobotElement.text("AUTO DISABLED");
+      } else if (!isAuto && isEnabled) {
+        teamRobotElement.attr("data-robot-state", "teleop");
+        teamRobotElement.text("TELEOP");
+      } else {
+        teamRobotElement.attr("data-robot-state", "teleop-disabled");
+        teamRobotElement.text("TELEOP DISABLED");
+      }
+    } else if (!stationStatus.DsConn || !stationStatus.DsConn.RobotLinked) {
+      teamElement.attr("data-bypassed", "false");
+      teamRobotElement.attr("data-robot-state", "not-ready");
       teamRobotElement.text("NOT READY");
     } else {
       teamElement.attr("data-bypassed", "false");
-      teamRobotElement.attr("data-status-ok", true);
+      teamRobotElement.attr("data-robot-state", "ready");
       teamRobotElement.text("READY");
     }
   });
