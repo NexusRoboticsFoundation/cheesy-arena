@@ -213,9 +213,11 @@ func (arena *Arena) GenerateMatchLoadMessage() any {
 	expectedStartTime := arena.CurrentMatch.Time
 	if previousMatch != nil {
 		scheduledCycle := arena.CurrentMatch.Time.Sub(previousMatch.Time)
-		expectedStartTime = previousMatch.StartedAt.Add(scheduledCycle)
-		if expectedStartTime.Before(arena.CurrentMatch.Time) {
-			expectedStartTime = arena.CurrentMatch.Time
+		if(scheduledCycle < 30*time.Minute) {
+			expectedStartTime = previousMatch.StartedAt.Add(scheduledCycle)
+			if expectedStartTime.Before(arena.CurrentMatch.Time) {
+				expectedStartTime = arena.CurrentMatch.Time
+			}
 		}
 	}
 
