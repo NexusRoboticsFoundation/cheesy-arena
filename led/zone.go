@@ -224,7 +224,6 @@ func (zone *zone) updateRainbowMode(counter int) {
 
 		if side == 2 || side == 4 {
 			pixel = pixelsPerFixture - 1 - pixel
-			fixture = fixturesPerSide - 1 - fixture
 		}
 
 		start := ((side-1)*fixturesPerSide + fixture) * pixelsPerFixture
