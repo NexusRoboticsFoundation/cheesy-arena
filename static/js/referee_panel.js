@@ -99,12 +99,12 @@ var fieldNotSafeToStart = function () {
 
 // Shows confirmation modal if not all scores are ready, otherwise directly commits and posts.
 var confirmCommit = function () {
-  if (scoreIsReady) {
+  // if (scoreIsReady) {
     commitAndPost();
-    return;
-  }
+  //   return;
+  // }
 
-  $("#confirmCommit").modal("show");
+  // $("#confirmCommit").modal("show");
 };
 
 // Commits the score and posts results to the audience.
