@@ -1467,7 +1467,7 @@ func (arena *Arena) handleTeamStop(station string, eStopState, aStopState bool) 
 
 // Set the field lights and team signs to purple, if not in a match.
 func (arena *Arena) SignalVolunteers() {
-	if arena.MatchState != PostMatch && arena.MatchState != PreMatch {
+	if arena.MatchState != PostMatch && arena.MatchState != PreMatch && arena.MatchState != TimeoutActive {
 		// Don't signal volunteers during matches.
 		return
 	}
@@ -1481,7 +1481,7 @@ func (arena *Arena) SignalVolunteers() {
 
 // Set the field lights and team signs to green, if not in a match.
 func (arena *Arena) SignalReset() {
-	if arena.MatchState != PostMatch && arena.MatchState != PreMatch {
+	if arena.MatchState != PostMatch && arena.MatchState != PreMatch && arena.MatchState != TimeoutActive {
 		// Don't signal reset during matches.
 		return
 	}
