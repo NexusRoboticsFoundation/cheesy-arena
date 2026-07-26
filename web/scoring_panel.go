@@ -7,14 +7,16 @@ package web
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/Team254/cheesy-arena/field"
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
 	"github.com/Team254/cheesy-arena/websocket"
 	"github.com/mitchellh/mapstructure"
-	"io"
-	"log"
-	"net/http"
 )
 
 type ScoringPosition struct {
@@ -183,6 +185,16 @@ func (web *Web) scoringPanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 					append(web.arena.BlueRealtimeScore.CurrentScore.Fouls, foul)
 			}
 			web.arena.RealtimeScoreNotifier.Notify()
+		} else if command == "fieldSafeToStart" {
+			if web.arena.MatchState != field.PreMatch {
+				continue
+			}
+			web.arena.FieldSafeToStart = time.Now()
+		} else if command == "fieldNotSafeToStart" {
+			if web.arena.MatchState != field.PreMatch {
+				continue
+			}
+			web.arena.FieldSafeToStart = time.Time{}
 		}
 
 		if scoreChanged {
