@@ -262,12 +262,12 @@ body {
 }
 
 .fms-status-block i {
-  font-size: 2vw;
-  margin-bottom: 0.1vw;
+  font-size: 3vw;
+  margin-bottom: 0.2vw;
 }
 
 .fms-status-text {
-  font-size: 0.8vw;
+  font-size: 1.2vw;
   font-weight: bold;
 }
 
