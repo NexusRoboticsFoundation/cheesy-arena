@@ -402,7 +402,6 @@ func (arena *Arena) LoadMatch(match *model.Match) error {
 	arena.Plc.ResetMatch()
 	arena.NextFoulId = 1
 	arena.redWonAuto = false
-	arena.Leds.SetMode(led.OffMode, led.OffMode)
 
 	// Notify any listeners about the new match.
 	arena.MatchLoadNotifier.Notify()
@@ -1327,10 +1326,6 @@ func (arena *Arena) handlePlcInputOutput() {
 	// Handle the evergreen PLC functions: stack lights, stack buzzer, and field reset light.
 	switch arena.MatchState {
 	case PreMatch:
-		if arena.lastMatchState != PreMatch {
-			arena.Plc.SetFieldResetLight(true)
-			arena.Leds.SetMode(led.GreenMode, led.GreenMode)
-		}
 		fallthrough
 	case TimeoutActive:
 		fallthrough
@@ -1456,7 +1451,7 @@ func (arena *Arena) handleTeamStop(station string, eStopState, aStopState bool) 
 
 // Set the field lights and team signs to purple, if not in a match.
 func (arena *Arena) SignalVolunteers() {
-	if arena.MatchState != PostMatch && arena.MatchState != PreMatch {
+	if arena.MatchState != PostMatch && arena.MatchState != PreMatch && arena.MatchState != TimeoutActive {
 		// Don't signal volunteers during matches.
 		return
 	}
@@ -1464,12 +1459,13 @@ func (arena *Arena) SignalVolunteers() {
 	arena.FieldReset = false
 	arena.AllianceStationDisplayMode = "signalCount"
 	arena.AllianceStationDisplayModeNotifier.Notify()
+	arena.Plc.SetFieldResetLight(false)
 	arena.Leds.SetMode(led.PurpleMode, led.PurpleMode)
 }
 
 // Set the field lights and team signs to green, if not in a match.
 func (arena *Arena) SignalReset() {
-	if arena.MatchState != PostMatch && arena.MatchState != PreMatch {
+	if arena.MatchState != PostMatch && arena.MatchState != PreMatch && arena.MatchState != TimeoutActive {
 		// Don't signal reset during matches.
 		return
 	}
@@ -1481,6 +1477,7 @@ func (arena *Arena) SignalReset() {
 	arena.FieldReset = true
 	arena.AllianceStationDisplayMode = "fieldReset"
 	arena.AllianceStationDisplayModeNotifier.Notify()
+	arena.Plc.SetFieldResetLight(true)
 	arena.Leds.SetMode(led.GreenMode, led.GreenMode)
 }
 
