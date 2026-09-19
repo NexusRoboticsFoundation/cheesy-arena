@@ -7,13 +7,6 @@ package field
 
 import (
 	"fmt"
-	"github.com/Team254/cheesy-arena/game"
-	"github.com/Team254/cheesy-arena/led"
-	"github.com/Team254/cheesy-arena/model"
-	"github.com/Team254/cheesy-arena/network"
-	"github.com/Team254/cheesy-arena/partner"
-	"github.com/Team254/cheesy-arena/playoff"
-	"github.com/Team254/cheesy-arena/plc"
 	"log"
 	"math"
 	"math/rand"
@@ -23,6 +16,14 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Team254/cheesy-arena/game"
+	"github.com/Team254/cheesy-arena/led"
+	"github.com/Team254/cheesy-arena/model"
+	"github.com/Team254/cheesy-arena/network"
+	"github.com/Team254/cheesy-arena/partner"
+	"github.com/Team254/cheesy-arena/playoff"
+	"github.com/Team254/cheesy-arena/plc"
 )
 
 const (
@@ -85,6 +86,7 @@ type Arena struct {
 	EventStatus                       EventStatus
 	FieldVolunteers                   bool
 	FieldReset                        bool
+	FieldSafeToStart                  time.Time
 	AudienceDisplayMode               string
 	SavedMatch                        *model.Match
 	SavedMatchResult                  *model.MatchResult
@@ -538,6 +540,7 @@ func (arena *Arena) StartMatch() error {
 		arena.lastTeamLogTime = time.Time{}
 
 		arena.MatchState = StartMatch
+		arena.FieldSafeToStart = time.Time{}
 
 		if arena.EventSettings.NexusAutoQueueEnabled && arena.CurrentMatch.Type != model.Test {
 			go arena.NexusClient.MatchStarted(arena.CurrentMatch.LongName, arena.CurrentMatch.TypeOrder)
@@ -696,6 +699,9 @@ func (arena *Arena) Update() {
 		// Set all game data values to empty
 		for _, allianceStation := range arena.AllianceStations {
 			allianceStation.GameData = ""
+		}
+		if arena.Plc.IsFtaReady() && arena.checkCanStartMatch() == nil {
+			arena.StartMatch()
 		}
 	case StartMatch:
 		arena.MatchStartTime = time.Now()
@@ -1020,6 +1026,40 @@ func (arena *Arena) getNextMatch(excludeCurrent bool) (*model.Match, error) {
 	return nil, nil
 }
 
+// Returns the previous match of the same type that is currently loaded, or nil if there are no more matches.
+func (arena *Arena) GetPreviousMatch() (*model.Match, error) {
+	if arena.CurrentMatch.Type == model.Test {
+		return nil, nil
+	}
+
+	matches, err := arena.Database.GetMatchesByType(arena.CurrentMatch.Type, false)
+	if err != nil {
+		return nil, err
+	}
+
+	// Find the index of the current match in the matches slice
+	currentIndex := -1
+	for i, match := range matches {
+		if match.Id == arena.CurrentMatch.Id {
+			currentIndex = i
+			break
+		}
+	}
+
+	if currentIndex == -1 {
+		// Current match not found
+		return nil, nil
+	}
+
+	// If current match is the first in the list, there is no previous match.
+	if currentIndex == 0 {
+		return nil, nil
+	}
+
+	previous := matches[currentIndex-1]
+	return &previous, nil
+}
+
 // Configures the field network for the next match in advance of the current match being scored and committed.
 func (arena *Arena) preLoadNextMatch() {
 	if arena.MatchState != PostMatch {
@@ -1151,6 +1191,14 @@ func (arena *Arena) getStartMatchConditions() []string {
 				conditions,
 				fmt.Sprintf("PLC ArmorBlock %q is not connected", name),
 			)
+		}
+	}
+
+	if arena.FieldSafeToStart.IsZero() {
+		conditions = append(conditions, "HR ready switch is not active")
+	} else {
+		if time.Since(arena.FieldSafeToStart) >= 750*time.Millisecond {
+			conditions = append(conditions, "HR ready switch is expired")
 		}
 	}
 
@@ -1318,9 +1366,6 @@ func (arena *Arena) handlePlcInputOutput() {
 			}
 		}
 	case PostMatch:
-		if arena.FieldReset {
-			arena.Plc.SetFieldResetLight(true)
-		}
 		scoreReady := arena.RedRealtimeScore.FoulsCommitted && arena.BlueRealtimeScore.FoulsCommitted &&
 			arena.positionPostMatchScoreReady("red") && arena.positionPostMatchScoreReady("blue")
 		arena.Plc.SetStackLights(false, false, !scoreReady, false)
