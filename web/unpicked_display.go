@@ -1,6 +1,5 @@
 // Copyright 2026 Team 254. All Rights Reserved.
-// Author: pat@patfairbank.com (Patrick Fairbank)
-//
+
 // Web handlers for unpicked teams display.
 
 package web
@@ -55,6 +54,7 @@ func (web *Web) unpickedDisplayWebsocketHandler(w http.ResponseWriter, r *http.R
 	ws.HandleNotifiers(
 		display.Notifier,
 		web.arena.AllianceSelectionNotifier,
+		web.arena.AudienceDisplayModeNotifier,
 		web.arena.ReloadDisplaysNotifier,
 	)
 }

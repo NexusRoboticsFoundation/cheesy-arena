@@ -70,6 +70,7 @@ type EventSettings struct {
 	SCCDownCommands                  string
 	PlcAddress                       string
 	LedControllerAddress             string
+	LedUniverseMode                  string
 	AdminPassword                    string
 	TeamSignRed1Id                   int
 	TeamSignRed2Id                   int
@@ -142,6 +143,7 @@ func (database *Database) GetEventSettings() (*EventSettings, error) {
 		ApChannel:                  36,
 		SCCUpCommands:              strings.Join(sccDefaultUpCommands, "\n"),
 		SCCDownCommands:            strings.Join(sccDefaultDownCommands, "\n"),
+		LedUniverseMode:            "single",
 		CompanionAddress:           "",
 		AutoDurationSec:            game.MatchTiming.AutoDurationSec,
 		PauseDurationSec:           game.MatchTiming.PauseDurationSec,

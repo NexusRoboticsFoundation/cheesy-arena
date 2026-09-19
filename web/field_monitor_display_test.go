@@ -1,4 +1,4 @@
-// Copyright 2018 Team 254. All Rights Reserved.
+// Copyright 2026 Team 254. All Rights Reserved.
 // Author: pat@patfairbank.com (Patrick Fairbank)
 
 package web

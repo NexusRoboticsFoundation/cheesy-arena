@@ -1,5 +1,5 @@
 /*
-  Copyright 2024 Team 254. All Rights Reserved.
+  Copyright 2026 Team 254. All Rights Reserved.
 */
 
 html {
@@ -271,7 +271,6 @@ body {
   font-weight: bold;
 }
 
-/* Add some classes to modify the icon color if things are okay */
 .fms-status-block[data-status-ok="true"] {
   background-color: #4caf50;
   color: #000;

@@ -1,4 +1,5 @@
-// Copyright 2024 Team 254. All Rights Reserved.
+// Copyright 2026 Team 254. All Rights Reserved.
+
 // Client-side logic for the FMS field monitor display.
 
 let websocket;

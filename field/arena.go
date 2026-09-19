@@ -223,6 +223,7 @@ func (arena *Arena) LoadSettings() error {
 	if err = arena.Leds.SetAddress(settings.LedControllerAddress); err != nil {
 		return err
 	}
+	arena.Leds.SetUniverseMode(settings.LedUniverseMode)
 	arena.TbaClient = partner.NewTbaClient(settings.TbaEventCode, settings.TbaSecretId, settings.TbaSecret)
 	arena.NexusClient = partner.NewNexusClient(settings.TbaEventCode, settings.NexusAutoQueueKey)
 	arena.BlackmagicClient = partner.NewBlackmagicClient(settings.BlackmagicAddresses)
@@ -666,6 +667,10 @@ func (arena *Arena) SetAllianceStationDisplayMode(mode string) {
 	if arena.AllianceStationDisplayMode != mode {
 		arena.AllianceStationDisplayMode = mode
 		arena.AllianceStationDisplayModeNotifier.Notify()
+
+		if mode == "logo" {
+			arena.Leds.SetMode(led.RedMode, led.BlueMode)
+		}
 	}
 }
 
