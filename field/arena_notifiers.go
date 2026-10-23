@@ -6,12 +6,14 @@
 package field
 
 import (
+	"log"
+	"strconv"
+	"time"
+
 	"github.com/Team254/cheesy-arena/game"
 	"github.com/Team254/cheesy-arena/model"
 	"github.com/Team254/cheesy-arena/playoff"
 	"github.com/Team254/cheesy-arena/websocket"
-	"log"
-	"strconv"
 )
 
 type ArenaNotifiers struct {
@@ -210,6 +212,18 @@ func (arena *Arena) GenerateMatchLoadMessage() any {
 	var allowManualSubstitution = arena.CurrentMatch.ShouldAllowSubstitution() &&
 		!(arena.EventSettings.NexusEnabled && arena.CurrentMatch.ShouldAllowNexusSubstitution())
 
+	previousMatch, _ := arena.GetPreviousMatch()
+	expectedStartTime := arena.CurrentMatch.Time
+	if previousMatch != nil {
+		scheduledCycle := arena.CurrentMatch.Time.Sub(previousMatch.Time)
+		if(scheduledCycle < 30*time.Minute) {
+			expectedStartTime = previousMatch.StartedAt.Add(scheduledCycle)
+			if expectedStartTime.Before(arena.CurrentMatch.Time) {
+				expectedStartTime = arena.CurrentMatch.Time
+			}
+		}
+	}
+
 	return &struct {
 		PlayoffRedAllianceYellowCard  bool
 		PlayoffBlueAllianceYellowCard bool
@@ -223,6 +237,7 @@ func (arena *Arena) GenerateMatchLoadMessage() any {
 		BlueOffFieldTeams             []*model.Team
 		BreakDescription              string
 		BreakNextMatchName            string
+		ExpectedStartTime             time.Time
 	}{
 		playoffRedAllianceYellowCard,
 		playoffBlueAllianceYellowCard,
@@ -236,6 +251,7 @@ func (arena *Arena) GenerateMatchLoadMessage() any {
 		blueOffFieldTeams,
 		arena.breakDescription,
 		arena.breakNextMatchName,
+		expectedStartTime,
 	}
 }
 

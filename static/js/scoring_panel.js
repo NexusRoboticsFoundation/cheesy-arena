@@ -76,6 +76,16 @@ const addFoul = function (alliance, isMajor) {
   websocket.send("addFoul", {Alliance: alliance, IsMajor: isMajor});
 }
 
+// Sends a websocket message to unlock match start.
+var fieldSafeToStart = function () {
+  websocket.send("fieldSafeToStart");
+};
+
+// Sends a websocket message to lock match start.
+var fieldNotSafeToStart = function () {
+  websocket.send("fieldNotSafeToStart");
+};
+
 // Handles a websocket message to update the match status.
 const handleMatchTime = function (data) {
   switch (matchStates[data.MatchState]) {
@@ -182,5 +192,19 @@ $(function () {
     resetLocalState: function (event) {
       resetLocalState();
     },
+  });
+
+  // The keycode assigned to the physical USB button attached to the head ref device.
+  const FIELD_SAFE_KEY = 'F16';
+  $(document).on('keydown', function(event) {
+    if (event.key === FIELD_SAFE_KEY) {
+      fieldSafeToStart();
+    }
+  });
+
+  $(document).on('keyup', function(event) {
+    if (event.key === FIELD_SAFE_KEY) {
+      fieldNotSafeToStart();
+    }
   });
 });
