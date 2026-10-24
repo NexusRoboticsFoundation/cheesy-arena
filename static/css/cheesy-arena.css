@@ -153,6 +153,9 @@
 .badge-scoring {
   background-color: #e66;
 }
+.badge-scoring[data-connected=true] {
+  background-color: #fc3;
+}
 .badge-scoring[data-ready=true] {
   background-color: #0c6;
 }
