@@ -47,7 +47,6 @@ body {
   color: #333;
 }
 
-
 .left-score, .right-score {
   font-size: 1.0vw;
 }
@@ -56,10 +55,10 @@ body {
   display: none;
 }
 
-.left-score[data-reversed=false], .right-score[data-reversed=true] {
+.left-score[data-reversed="false"], .right-score[data-reversed="true"] {
   color: #d32f2f;
 }
-.left-score[data-reversed=true], .right-score[data-reversed=false] {
+.left-score[data-reversed="true"], .right-score[data-reversed="false"] {
   color: #1976d2;
 }
 
@@ -117,11 +116,9 @@ body {
   .fms-station-badge { margin-right: 1vw; }
   .fms-status-block { padding: 0.6vw 4vw; }
   .fms-status-block i { font-size: 4vw; margin-bottom: 0.2vw; }
-  .fms-status-text { font-size: 1.6vw; }
+  .fms-status-text, .fms-team-notes { font-size: 1.6vw; }
   .fms-stat-value { font-size: 2vw; margin-bottom: 0.2vw; }
-  .fms-stat-label { font-size: 1.2vw; }
-  .fms-stat-sub { font-size: 1.2vw; }
-  .fms-team-notes { font-size: 1.6vw; }
+  .fms-stat-label, .fms-stat-sub { font-size: 1.2vw; }
   
   #matchStatusRow { font-size: 2vw; }
   #eventStatusRow { font-size: 2.4vw; }
@@ -179,7 +176,6 @@ body {
   background-color: #1976d2;
 }
 
-
 .fms-new-key-badge {
   background-color: #666;
   color: white;
@@ -208,10 +204,6 @@ body {
   box-sizing: border-box;
 }
 
-.fms-status-pill[data-robot-state="estop"] {
-  background-color: #2a2a2a;
-  color: white;
-}
 .fms-status-pill[data-robot-state="astop"],
 .fms-status-pill[data-robot-state="auto-disabled"],
 .fms-status-pill[data-robot-state="teleop-disabled"] {
@@ -228,11 +220,6 @@ body {
   background-color: #e0e0e0;
   color: #000;
   border: 1px solid #000;
-}
-.fms-status-pill[data-robot-state="not-ready"],
-.fms-status-pill[data-robot-state="no-team"] {
-  background-color: #2a2a2a;
-  color: white;
 }
 .fms-status-pill[data-robot-state="ready"] {
   background-color: #4caf50;
