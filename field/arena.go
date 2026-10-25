@@ -588,6 +588,16 @@ func (arena *Arena) ResetMatch() error {
 	arena.AllianceStations["B1"].Bypass = false
 	arena.AllianceStations["B2"].Bypass = false
 	arena.AllianceStations["B3"].Bypass = false
+	var redEStops, blueEStops [3]bool
+	if arena.Plc.IsEnabled() {
+		redEStops, blueEStops = arena.Plc.GetTeamEStops()
+	}
+	arena.AllianceStations["R1"].EStop = redEStops[0]
+	arena.AllianceStations["R2"].EStop = redEStops[1]
+	arena.AllianceStations["R3"].EStop = redEStops[2]
+	arena.AllianceStations["B1"].EStop = blueEStops[0]
+	arena.AllianceStations["B2"].EStop = blueEStops[1]
+	arena.AllianceStations["B3"].EStop = blueEStops[2]
 	arena.MuteMatchSounds = false
 	return nil
 }
@@ -1438,6 +1448,20 @@ func (arena *Arena) getHubLightStates(currentTime time.Time) (bool, bool) {
 	default:
 		return false, false
 	}
+}
+
+// Latches the emergency stop for the given alliance station during a match.
+func (arena *Arena) EStop(station string) error {
+	if arena.MatchState != StartMatch && arena.MatchState != AutoPeriod && arena.MatchState != PausePeriod &&
+		arena.MatchState != TeleopPeriod {
+		return fmt.Errorf("cannot E-stop robot when a match is not in progress")
+	}
+	if _, ok := arena.AllianceStations[station]; !ok {
+		return fmt.Errorf("Invalid alliance station '%s'.", station)
+	}
+	arena.AllianceStations[station].EStop = true
+	arena.ArenaStatusNotifier.Notify()
+	return nil
 }
 
 func (arena *Arena) ToggleBypass(station string) error {

@@ -18,6 +18,10 @@ import (
 	"github.com/Team254/cheesy-arena/model"
 	"github.com/Team254/cheesy-arena/websocket"
 	"github.com/mitchellh/mapstructure"
+	"io"
+	"log"
+	"net/http"
+	"strconv"
 )
 
 // Renders the referee interface for assigning fouls.
@@ -196,6 +200,17 @@ func (web *Web) refereePanelWebsocketHandler(w http.ResponseWriter, r *http.Requ
 				continue
 			}
 			err = web.arena.ToggleBypass(station)
+			if err != nil {
+				writeWebsocketError(ws, err.Error())
+				continue
+			}
+		case "eStop":
+			station, ok := data.(string)
+			if !ok {
+				writeWebsocketError(ws, fmt.Sprintf("Failed to parse '%s' message.", messageType))
+				continue
+			}
+			err = web.arena.EStop(station)
 			if err != nil {
 				writeWebsocketError(ws, err.Error())
 				continue
