@@ -546,6 +546,7 @@ func (arena *Arena) StartMatch() error {
 
 		arena.MatchState = StartMatch
 		arena.FieldSafeToStart = time.Time{}
+		arena.countdownStartTime = time.Time{}
 
 		if arena.EventSettings.NexusAutoQueueEnabled && arena.CurrentMatch.Type != model.Test {
 			go arena.NexusClient.MatchStarted(arena.CurrentMatch.LongName, arena.CurrentMatch.TypeOrder)
@@ -715,7 +716,7 @@ func (arena *Arena) Update() {
 		for _, allianceStation := range arena.AllianceStations {
 			allianceStation.GameData = ""
 		}
-		if arena.Plc.IsFtaReady() && arena.checkCanStartMatch() == nil {
+		if arena.Plc.IsFtaReady() && arena.Plc.IsMatchStartPressed() && arena.checkCanStartMatch() == nil {
 			if arena.countdownStartTime.IsZero() {
 				arena.countdownStartTime = time.Now()
 				arena.PlaySound(fmt.Sprintf("countdown_%d", rand.Intn(2)))
@@ -1209,6 +1210,9 @@ func (arena *Arena) getStartMatchConditions() []string {
 		if arena.EventSettings.FtaReadySwitchRequired && !arena.Plc.IsFtaReady() {
 			conditions = append(conditions, "FTA ready switch is not active")
 		}
+		if !arena.Plc.IsMatchStartPressed() {
+			conditions = append(conditions, "Match start switch is not active")
+		}
 		var disconnectedArmorBlocks []string
 		for name, status := range arena.Plc.GetArmorBlockStatuses() {
 			if !status {
@@ -1224,13 +1228,13 @@ func (arena *Arena) getStartMatchConditions() []string {
 		}
 	}
 
-	if arena.FieldSafeToStart.IsZero() {
-		conditions = append(conditions, "cannot start match until head ref marks field as safe")
-	} else {
-		if time.Since(arena.FieldSafeToStart) >= 1*time.Second {
-			conditions = append(conditions, "cannot start match until head ref marks field as safe again")
-		}
-	}
+	// if arena.FieldSafeToStart.IsZero() {
+	// 	conditions = append(conditions, "cannot start match until head ref marks field as safe")
+	// } else {
+	// 	if time.Since(arena.FieldSafeToStart) >= 1*time.Second {
+	// 		conditions = append(conditions, "cannot start match until head ref marks field as safe again")
+	// 	}
+	// }
 
 	return conditions
 }

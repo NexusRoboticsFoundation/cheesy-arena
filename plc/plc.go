@@ -27,6 +27,7 @@ type Plc interface {
 	GetEthernetConnected() ([3]bool, [3]bool)
 	IsFtaReady() bool
 	IsFtaReadyConnected() bool
+	IsMatchStartPressed() bool
 	ResetMatch()
 	SetStackLights(red, blue, orange, green bool)
 	SetStackBuzzer(state bool)
@@ -102,6 +103,7 @@ const (
 	blueHubSensor2
 	blueHubSensor3
 	blueHubSensor4
+	matchStart
 	inputCount
 )
 
@@ -271,6 +273,11 @@ func (plc *ModbusPlc) IsFtaReady() bool {
 // Returns true if the FTA ready dead-man switch is connected.
 func (plc *ModbusPlc) IsFtaReadyConnected() bool {
 	return plc.registers[fieldIoConnection]&(1<<ftaReadyConnectedBit) > 0
+}
+
+// Returns true if the match start button is active.
+func (plc *ModbusPlc) IsMatchStartPressed() bool {
+	return plc.inputs[matchStart]
 }
 
 // Resets the internal state of the PLC to start a new match.
