@@ -38,6 +38,7 @@ const (
 	scheduledBreakDelaySec   = 5
 	earlyLateThresholdMin    = 2.5
 	MaxMatchGapMin           = 20
+	countdownDurationMs      = 3850
 )
 
 // Progression of match states.
@@ -76,6 +77,7 @@ type Arena struct {
 	MatchState
 	lastMatchState                    MatchState
 	CurrentMatch                      *model.Match
+	countdownStartTime                time.Time
 	MatchStartTime                    time.Time
 	LastMatchTimeSec                  float64
 	RedRealtimeScore                  *RealtimeScore
@@ -86,6 +88,7 @@ type Arena struct {
 	EventStatus                       EventStatus
 	FieldVolunteers                   bool
 	FieldReset                        bool
+	FieldSafeToStart                  time.Time
 	AudienceDisplayMode               string
 	SavedMatch                        *model.Match
 	SavedMatchResult                  *model.MatchResult
@@ -539,6 +542,7 @@ func (arena *Arena) StartMatch() error {
 		arena.lastTeamLogTime = time.Time{}
 
 		arena.MatchState = StartMatch
+		arena.FieldSafeToStart = time.Time{}
 
 		if arena.EventSettings.NexusAutoQueueEnabled && arena.CurrentMatch.Type != model.Test {
 			go arena.NexusClient.MatchStarted(arena.CurrentMatch.LongName, arena.CurrentMatch.TypeOrder)
@@ -697,6 +701,21 @@ func (arena *Arena) Update() {
 		// Set all game data values to empty
 		for _, allianceStation := range arena.AllianceStations {
 			allianceStation.GameData = ""
+		}
+		if arena.Plc.IsFtaReady() && arena.checkCanStartMatch() == nil {
+			if arena.countdownStartTime.IsZero() {
+				arena.countdownStartTime = time.Now()
+				arena.PlaySound(fmt.Sprintf("countdown_%d", rand.Intn(2)))
+			} else {
+				if time.Since(arena.countdownStartTime) > time.Millisecond*countdownDurationMs {
+					arena.StartMatch()
+				}
+			}
+		} else {
+			if !arena.countdownStartTime.IsZero() {
+				arena.StopSound()
+				arena.countdownStartTime = time.Time{}
+			}
 		}
 	case StartMatch:
 		arena.MatchStartTime = time.Now()
@@ -1155,6 +1174,14 @@ func (arena *Arena) getStartMatchConditions() []string {
 		}
 	}
 
+	if arena.FieldSafeToStart.IsZero() {
+		conditions = append(conditions, "cannot start match until head ref marks field as safe")
+	} else {
+		if time.Since(arena.FieldSafeToStart) >= 1*time.Second {
+			conditions = append(conditions, "cannot start match until head ref marks field as safe again")
+		}
+	}
+
 	return conditions
 }
 
@@ -1477,6 +1504,10 @@ func (arena *Arena) PlaySound(name string) {
 	if !arena.MuteMatchSounds {
 		arena.PlaySoundNotifier.NotifyWithMessage(name)
 	}
+}
+
+func (arena *Arena) StopSound() {
+	arena.PlaySoundNotifier.NotifyWithMessage("")
 }
 
 func (arena *Arena) positionPostMatchScoreReady(position string) bool {
