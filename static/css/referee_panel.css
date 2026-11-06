@@ -25,7 +25,7 @@ h3 {
   align-items: center;
   color: #fff;
 }
-#matchName {
+#matchName, #matchTimer {
   font-size: 2vw;
 }
 #refereePanel {
