@@ -114,16 +114,19 @@ type Arena struct {
 }
 
 type AllianceStation struct {
-	DsConn       *DriverStationConnection
-	TeamMatchLog *TeamMatchLog
-	Ethernet     bool
-	AStop        bool
-	EStop        bool
-	Bypass       bool
-	Team         *model.Team
-	WifiStatus   network.TeamWifiStatus
-	aStopReset   bool
-	GameData     string
+	DsConn               *DriverStationConnection
+	TeamMatchLog         *TeamMatchLog
+	Ethernet             bool
+	AStop                bool
+	EStop                bool
+	Bypass               bool
+	Team                 *model.Team
+	WifiStatus           network.TeamWifiStatus
+	aStopReset           bool
+	GameData             string
+	TeamMismatch         bool
+	MoveToStation        string
+	lastTeamMismatchTime time.Time
 }
 
 // Creates the arena and sets it to its initial state.
@@ -589,6 +592,16 @@ func (arena *Arena) ResetMatch() error {
 	arena.AllianceStations["B1"].Bypass = false
 	arena.AllianceStations["B2"].Bypass = false
 	arena.AllianceStations["B3"].Bypass = false
+	var redEStops, blueEStops [3]bool
+	if arena.Plc.IsEnabled() {
+		redEStops, blueEStops = arena.Plc.GetTeamEStops()
+	}
+	arena.AllianceStations["R1"].EStop = redEStops[0]
+	arena.AllianceStations["R2"].EStop = redEStops[1]
+	arena.AllianceStations["R3"].EStop = redEStops[2]
+	arena.AllianceStations["B1"].EStop = blueEStops[0]
+	arena.AllianceStations["B2"].EStop = blueEStops[1]
+	arena.AllianceStations["B3"].EStop = blueEStops[2]
 	arena.MuteMatchSounds = false
 	return nil
 }
@@ -988,6 +1001,8 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 
 	// Force the A-stop to be reset by the new team if it is already pressed (if the PLC is enabled).
 	arena.AllianceStations[station].aStopReset = !arena.Plc.IsEnabled()
+	arena.AllianceStations[station].TeamMismatch = false
+	arena.AllianceStations[station].MoveToStation = ""
 
 	// Do nothing if the station is already assigned to the requested team.
 	dsConn := arena.AllianceStations[station].DsConn
@@ -995,6 +1010,7 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 		return nil
 	}
 	if dsConn != nil {
+		dsConn.clearWrongStationMoveTo(arena)
 		dsConn.close()
 		arena.AllianceStations[station].Team = nil
 		arena.AllianceStations[station].DsConn = nil
@@ -1190,7 +1206,7 @@ func (arena *Arena) getStartMatchConditions() []string {
 		if arena.Plc.GetFieldEStop() {
 			conditions = append(conditions, "field emergency stop is active")
 		}
-		if !arena.Plc.IsFtaReady() {
+		if arena.EventSettings.FtaReadySwitchRequired && !arena.Plc.IsFtaReady() {
 			conditions = append(conditions, "FTA ready switch is not active")
 		}
 		var disconnectedArmorBlocks []string
@@ -1238,7 +1254,9 @@ func (arena *Arena) getAllianceStationStartConditions(stations ...string) []stri
 			aStopNotResetStations = append(aStopNotResetStations, station)
 		}
 		if !allianceStation.Bypass {
-			if allianceStation.DsConn == nil || !allianceStation.DsConn.RobotLinked {
+			if allianceStation.DsConn == nil || allianceStation.DsConn.WrongStation != "" ||
+				allianceStation.TeamMismatch || allianceStation.MoveToStation != "" ||
+				!allianceStation.DsConn.RobotLinked {
 				disconnectedStations = append(disconnectedStations, station)
 			}
 		}
@@ -1350,6 +1368,12 @@ func (arena *Arena) handlePlcInputOutput() {
 	arena.AllianceStations["B1"].Ethernet = blueEthernets[0]
 	arena.AllianceStations["B2"].Ethernet = blueEthernets[1]
 	arena.AllianceStations["B3"].Ethernet = blueEthernets[2]
+	for _, allianceStation := range arena.AllianceStations {
+		if !allianceStation.Ethernet {
+			allianceStation.TeamMismatch = false
+			allianceStation.MoveToStation = ""
+		}
+	}
 	arena.Plc.SetAwardsModeLight(arena.AllianceStationDisplayMode == "logo")
 
 	// Handle in-match PLC functions.
@@ -1454,6 +1478,20 @@ func (arena *Arena) getHubLightStates(currentTime time.Time) (bool, bool) {
 	default:
 		return false, false
 	}
+}
+
+// Latches the emergency stop for the given alliance station during a match.
+func (arena *Arena) EStop(station string) error {
+	if arena.MatchState != StartMatch && arena.MatchState != AutoPeriod && arena.MatchState != PausePeriod &&
+		arena.MatchState != TeleopPeriod {
+		return fmt.Errorf("cannot E-stop robot when a match is not in progress")
+	}
+	if _, ok := arena.AllianceStations[station]; !ok {
+		return fmt.Errorf("Invalid alliance station '%s'.", station)
+	}
+	arena.AllianceStations[station].EStop = true
+	arena.ArenaStatusNotifier.Notify()
+	return nil
 }
 
 func (arena *Arena) ToggleBypass(station string) error {
